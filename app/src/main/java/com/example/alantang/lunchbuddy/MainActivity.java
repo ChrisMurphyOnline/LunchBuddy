@@ -9,6 +9,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.facebook.FacebookSdk;
+import com.parse.LogInCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseFacebookUtils;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
+
+import java.util.Arrays;
+import java.util.List;
+
 
 public class MainActivity extends ActionBarActivity {
 
@@ -17,8 +28,38 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+// Initialize the SDK before executing any other operations,
+        // especially, if you're using Facebook UI elements.
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        // Enable Local Datastore.
+        Parse.enableLocalDatastore(this);
+
+        Parse.initialize(this, "cRs6iJZlt7MHBAqP8ch1SKLREZ6yADDtgl66Cf82", "NVjTb0Y3aMVWHrpEUCjxiIWQPEuj1aOIjBCmkD8Z");
+        ParseFacebookUtils.initialize(getApplicationContext());
+
+        final List<String> permissions = Arrays.asList("public_profile", "email");
+
+        ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions, new LogInCallback() {
+            @Override
+            public void done(ParseUser user, ParseException err) {
+                if (user == null) {
+                    Log.d("MyApp", "Uh oh. The user cancelled the Facebook login.");
+                } else if (user.isNew()) {
+                    Log.d("MyApp", "User signed up and logged in through Facebook!");
+                } else {
+                    Log.d("MyApp", "User logged in through Facebook!");
+                }
+            }
+        });
+
 //        sets content to be activity_main.xml
         setContentView(R.layout.activity_main);
+
+        //test parse
+        ParseObject testObject = new ParseObject("TestObject");
+        testObject.put("foo", "bar");
+        testObject.saveInBackground();
+
 
         Button profileButton = (Button) findViewById(R.id.profileButton);
         Button datesButton = (Button) findViewById(R.id.datesButton);
@@ -61,6 +102,15 @@ public class MainActivity extends ActionBarActivity {
 
         Log.i(TAG, "onCreate");
     }
+    // Facebook calls this feature "Single sign-on" (SSO), and requires you to override onActivityResult() in your calling Activity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        ParseFacebookUtils.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+
 
     @Override
     protected void onStart() {
