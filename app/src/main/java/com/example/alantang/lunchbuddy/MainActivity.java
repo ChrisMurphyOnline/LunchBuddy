@@ -1,10 +1,13 @@
 package com.example.alantang.lunchbuddy;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -17,9 +20,54 @@ public class MainActivity extends ActionBarActivity {
 //        sets content to be activity_main.xml
         setContentView(R.layout.activity_main);
 
+        Button profileButton = (Button) findViewById(R.id.profileButton);
+        Button datesButton = (Button) findViewById(R.id.datesButton);
+        Button availableButton = (Button) findViewById(R.id.toggleButton);
+        Button friendsButton = (Button) findViewById(R.id.friendsButton);
+
+        profileButton.setOnClickListener(new View.OnClickListener() {
+             @Override
+             public void onClick(View v) {
+                 Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
+                 startActivity(i);
+            }
+        });
+
+        datesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), CalendarActivity.class);
+                startActivity(i);
+            }
+        });
+//
+//        toggleButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent i = new Intent(getApplicationContext(), Available.class);
+//                startActivity(i);
+//            }
+//        });
+//
+//        friendsButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent i = new Intent(getApplicationContext(), Friends.class);
+//                startActivity(i);
+//            }
+//        });
+
+
+
         Log.i(TAG, "onCreate");
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i(TAG, "onStart");
+
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
