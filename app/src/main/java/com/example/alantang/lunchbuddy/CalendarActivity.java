@@ -5,25 +5,37 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
 
+import com.parse.ParseACL;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
+
 import java.util.Calendar;
+import java.util.Date;
+
+//import net.danlew.android.joda.JodaTimeAndroid;
 
 public class CalendarActivity extends Activity
 {
 
-    Button btnSelectDate,btnSelectTime;
+    private static final String TAG = "log_message";
+
+    Button buttonSelectDate,buttonSelectTime, buttonSubmit;
 
     static final int DATE_DIALOG_ID = 0;
-    static final int TIME_DIALOG_ID=1;
+    static final int TIME_DIALOG_ID = 1;
 
     // variables to save user selected date and time
-    public  int year,month,day,hour,minute;
+    public int year, month, day, hour, minute;
     // declare  the variables to Show/Set the date and time when Time and  Date Picker Dialog first appears
-    private int mYear, mMonth, mDay,mHour,mMinute;
+    private int mYear, mMonth, mDay, mHour, mMinute;
+
+    Date dateSelected;
 
     // constructor
 
@@ -39,17 +51,19 @@ public class CalendarActivity extends Activity
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
+
+
         // get the references of buttons
-        btnSelectDate=(Button)findViewById(R.id.buttonSelectDate);
-        btnSelectTime=(Button)findViewById(R.id.buttonSelectTime);
+        buttonSelectDate=(Button)findViewById(R.id.buttonSelectDate);
+        buttonSelectTime=(Button)findViewById(R.id.buttonSelectTime);
+        buttonSubmit = (Button) findViewById(R.id.buttonSubmit);
 
         // Set ClickListener on btnSelectDate
-        btnSelectDate.setOnClickListener(new View.OnClickListener() {
+        buttonSelectDate.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
                 // Show the DatePickerDialog
@@ -58,7 +72,7 @@ public class CalendarActivity extends Activity
         });
 
         // Set ClickListener on btnSelectTime
-        btnSelectTime.setOnClickListener(new View.OnClickListener() {
+        buttonSelectTime.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
                 // Show the TimePickerDialog
@@ -66,6 +80,30 @@ public class CalendarActivity extends Activity
             }
         });
 
+
+        // Set ClickListener for submit button
+        buttonSubmit.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View v) {
+                if (dateSelected != null) {
+                    ParseObject appointment = new ParseObject("Appointments");
+                    ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
+                    postACL.setPublicReadAccess(true);
+                    postACL.setPublicWriteAccess(false);
+                    appointment.setACL(postACL);
+                    appointment.put("Date", dateSelected);
+                    appointment.saveInBackground();
+                    Log.i(TAG, ParseUser.getCurrentUser().toString());
+                    Log.i(TAG, "Date: " + dateSelected);
+                    Log.i(TAG, "Uploaded to Parse!");
+
+                }
+                else {
+                    Log.i(TAG, "Date and time not inputted.");
+                }
+            }
+        });
+        //test parse
     }
 
 
@@ -75,11 +113,15 @@ public class CalendarActivity extends Activity
                 // the callback received when the user "sets" the Date in the DatePickerDialog
                 public void onDateSet(DatePicker view, int yearSelected,
                                       int monthOfYear, int dayOfMonth) {
-                    year = yearSelected;
+                    // quick fix for wrong year
+                    year = yearSelected - 1900;
                     month = monthOfYear;
                     day = dayOfMonth;
                     // Set the Selected Date in Select date Button
-                    btnSelectDate.setText("Date selected : "+day+"-"+month+"-"+year);
+                    dateSelected = new Date(year, month, day);
+//                    buttonSelectDate.setText("Date selected: "+day+" - "+month+" - "+year);
+                    String dateDisplay = dateSelected.toString().split("00:")[0];
+                    buttonSelectDate.setText("Date: " + dateDisplay);
                 }
             };
 
@@ -90,8 +132,17 @@ public class CalendarActivity extends Activity
                 public void onTimeSet(TimePicker view, int hourOfDay, int min) {
                     hour = hourOfDay;
                     minute = min;
+                    //check if date has been filled in
+                    if (year != 0 &&  month != 0 && day != 0) {
+                        dateSelected = new Date(year, month, day, hour, minute);
+                        Log.i(TAG, "Date successfully updated with time");
+                        Log.i(TAG, "Date: " + dateSelected);
+                    }
+                    else {
+                        Log.i(TAG, "Date not inputted ");
+                    }
                     // Set the Selected Date in Select date Button
-                    btnSelectTime.setText("Time selected :"+hour+"-"+minute);
+                    buttonSelectTime.setText("Time: "+hour+"."+minute);
                 }
             };
 

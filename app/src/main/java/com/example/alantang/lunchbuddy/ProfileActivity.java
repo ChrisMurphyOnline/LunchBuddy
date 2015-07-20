@@ -32,6 +32,8 @@ public class ProfileActivity extends ActionBarActivity {
 
         ListUtils.setDynamicHeight(mListViewAppointments);
         ListUtils.setDynamicHeight(mListViewAvailable);
+        
+
     }
 
     // added code for listviews

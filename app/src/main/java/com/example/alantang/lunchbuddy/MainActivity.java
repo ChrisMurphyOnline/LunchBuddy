@@ -14,7 +14,6 @@ import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
-import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.util.Arrays;
@@ -39,6 +38,23 @@ public class MainActivity extends ActionBarActivity {
 
         final List<String> permissions = Arrays.asList("public_profile", "email");
 
+
+        // get Development Key Hash
+//        try {
+//            PackageInfo info = getPackageManager().getPackageInfo("com.example.alantang.lunchbuddy",
+//                    PackageManager.GET_SIGNATURES);
+//            for (Signature signature : info.signatures) {
+//                MessageDigest md = MessageDigest.getInstance("SHA");
+//                md.update(signature.toByteArray());
+//                Log.i("KeyHash: ", Base64.encodeToString(md.digest(), 0));
+//            }
+//        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+//            Log.e("Test", e.getMessage());
+//        } catch (NoSuchAlgorithmException e) {
+//            Log.e("Test", e.getMessage());
+//        }
+
+
         ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions, new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException err) {
@@ -55,18 +71,12 @@ public class MainActivity extends ActionBarActivity {
 //        sets content to be activity_main.xml
         setContentView(R.layout.activity_main);
 
-        //test parse
-        ParseObject testObject = new ParseObject("TestObject");
-        testObject.put("foo", "bar");
-        testObject.saveInBackground();
+        Button buttonProfile = (Button) findViewById(R.id.buttonProfile);
+        Button buttonCalendar = (Button) findViewById(R.id.buttonCalendar);
+        Button buttonAvailable = (Button) findViewById(R.id.buttonAvailable);
+        Button buttonFriends = (Button) findViewById(R.id.buttonFriends);
 
-
-        Button profileButton = (Button) findViewById(R.id.profileButton);
-        Button datesButton = (Button) findViewById(R.id.datesButton);
-        Button availableButton = (Button) findViewById(R.id.toggleButton);
-        Button friendsButton = (Button) findViewById(R.id.friendsButton);
-
-        profileButton.setOnClickListener(new View.OnClickListener() {
+        buttonProfile.setOnClickListener(new View.OnClickListener() {
              @Override
              public void onClick(View v) {
                  Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
@@ -74,7 +84,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
-        datesButton.setOnClickListener(new View.OnClickListener() {
+        buttonCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), CalendarActivity.class);
@@ -82,7 +92,7 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 //
-//        toggleButton.setOnClickListener(new View.OnClickListener() {
+//        buttonAvailable.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
 //                Intent i = new Intent(getApplicationContext(), Available.class);
@@ -90,7 +100,7 @@ public class MainActivity extends ActionBarActivity {
 //            }
 //        });
 //
-//        friendsButton.setOnClickListener(new View.OnClickListener() {
+//        buttonFriends.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View v) {
 //                Intent i = new Intent(getApplicationContext(), Friends.class);
@@ -98,6 +108,10 @@ public class MainActivity extends ActionBarActivity {
 //            }
 //        });
 
+        // Intent for User to be accessible from other activities
+//        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+//        i.putExtra("new_variable_name","value");
+//        startActivity(i);
 
 
         Log.i(TAG, "onCreate");
@@ -108,9 +122,6 @@ public class MainActivity extends ActionBarActivity {
         super.onActivityResult(requestCode, resultCode, data);
         ParseFacebookUtils.onActivityResult(requestCode, resultCode, data);
     }
-
-
-
 
     @Override
     protected void onStart() {
