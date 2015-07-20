@@ -2,6 +2,7 @@ package com.example.alantang.lunchbuddy;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -10,29 +11,55 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.parse.FindCallback;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ProfileActivity extends ActionBarActivity {
 
-    private ListView mListViewAppointments, mListViewAvailable;
+    //Todo: remove / change title bar
+
+    private static final String TAG = "log_message";
+
+    ListView mListViewAppointments, mListViewAvailable;
+    ArrayList mListAppointments = new ArrayList<String>();
+    ArrayList mListDatesAvailable = new ArrayList<String>();
+    ArrayAdapter<String> mAppointmentsAdaptor;
+    ArrayAdapter<String> mAvailableAdaptor;
+
 // placeholders before the 2 listviews are populated
     private String [] data1 ={"Hiren", "Pratik", "Dhruv", "Narendra", "Piyush", "Priyank"};
-    private String [] data2 ={"Kirit", "Miral", "Bhushan", "Jiten", "Ajay", "Kamlesh"};
+//    private String [] data2 ={"Kirit", "Miral", "Bhushan", "Jiten", "Ajay", "Kamlesh"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        // download list of appointments
+        ParseQueryAppointments parseQueryAppointments = new ParseQueryAppointments();
+        parseQueryAppointments.getQuery();
+
+        for (int i = 0; i < mListAppointments.size(); i++) {
+            Log.d(TAG, mListAppointments.get(i).toString());
+        }
+        mAppointmentsAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
+        mAvailableAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
+
         mListViewAppointments = (ListView)findViewById(R.id.listView1);
         mListViewAvailable = (ListView)findViewById(R.id.listView2);
-
-        mListViewAppointments.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data1));
-        mListViewAvailable.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, data2));
+        mListViewAppointments.setAdapter(mAppointmentsAdaptor);
+        mListViewAvailable.setAdapter(mAvailableAdaptor);
 
         ListUtils.setDynamicHeight(mListViewAppointments);
         ListUtils.setDynamicHeight(mListViewAvailable);
-        
 
     }
 
@@ -79,4 +106,38 @@ public class ProfileActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public class ParseQueryAppointments <T extends ParseObject> extends Object {
+
+        public ParseQuery<ParseObject> getQuery() {
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
+            query.findInBackground(new FindCallback<ParseObject>() {
+                public void done(List<ParseObject> objects, ParseException e) {
+
+                    if (e == null) {
+                        for (int i = 0; i < objects.size(); i++) {
+                            Object object = objects.get(i);
+                            String date = ((ParseObject) object).getDate("Date").toString();
+                            mListDatesAvailable.add(date);
+
+
+// mListAppointments.add(objects.get(i).getDate("Date").toString());
+                            Log.d(TAG, objects.get(i).getDate("Date").toString());
+
+                        }
+                        mAvailableAdaptor.notifyDataSetChanged();
+                        Log.d(TAG, "Retrieved " + objects.size() + " appointments");
+
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Error: " + e.getMessage());
+                    }
+                }
+            });
+            return null;
+        }
+    }
+
+
+
 }

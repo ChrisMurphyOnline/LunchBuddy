@@ -86,7 +86,7 @@ public class CalendarActivity extends Activity
 
             public void onClick(View v) {
                 if (dateSelected != null) {
-                    ParseObject appointment = new ParseObject("Appointments");
+                    ParseObject appointment = new ParseObject("DatesAvailable");
                     ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
                     postACL.setPublicReadAccess(true);
                     postACL.setPublicWriteAccess(false);
@@ -127,6 +127,8 @@ public class CalendarActivity extends Activity
 
     // Register  TimePickerDialog listener
     private TimePickerDialog.OnTimeSetListener mTimeSetListener =
+
+            //Todo: fix time display, e.g. 12.1pm -> 12.01pm
             new TimePickerDialog.OnTimeSetListener() {
                 // the callback received when the user "sets" the TimePickerDialog in the dialog
                 public void onTimeSet(TimePicker view, int hourOfDay, int min) {
