@@ -30,12 +30,13 @@ repositories {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:22.2.0'
-    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
 
-    compile 'com.parse.bolts:bolts-android:1.+'
 
     compile fileTree(dir: 'libs', include: 'Parse-*.jar')
-    compile fileTree(dir: 'libs', include:'ParseFacebookUtilsV4-*.jar')
+    compile fileTree(dir: 'libs', include: 'ParseFacebookUtilsV4-*.jar')
 
+    compile 'com.android.support:appcompat-v7:22.2.0'
+    compile 'com.facebook.android:facebook-android-sdk:4.1.0'
+    compile 'com.parse.bolts:bolts-android:1.+'
+    compile 'com.android.support:support-v4:22.2.0'
 }

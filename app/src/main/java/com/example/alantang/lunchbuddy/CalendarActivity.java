@@ -55,8 +55,6 @@ public class CalendarActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
-
-
         // get the references of buttons
         buttonSelectDate=(Button)findViewById(R.id.buttonSelectDate);
         buttonSelectTime=(Button)findViewById(R.id.buttonSelectTime);
@@ -80,7 +78,7 @@ public class CalendarActivity extends Activity
             }
         });
 
-
+        //Todo: check for duplicates
         // Set ClickListener for submit button
         buttonSubmit.setOnClickListener(new View.OnClickListener() {
 
@@ -96,7 +94,6 @@ public class CalendarActivity extends Activity
                     Log.i(TAG, ParseUser.getCurrentUser().toString());
                     Log.i(TAG, "Date: " + dateSelected);
                     Log.i(TAG, "Uploaded to Parse!");
-
                 }
                 else {
                     Log.i(TAG, "Date and time not inputted.");
