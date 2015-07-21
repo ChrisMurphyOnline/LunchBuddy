@@ -10,20 +10,26 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
+import com.parse.GetCallback;
 import com.parse.ParseACL;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-//import net.danlew.android.joda.JodaTimeAndroid;
 
 public class CalendarActivity extends Activity
 {
 
     private static final String TAG = "log_message";
+    SimpleDateFormat dateFormat = new SimpleDateFormat("E dd MMM yyyy hh:mm aa z");
+    String objectId;
 
     Button buttonSelectDate,buttonSelectTime, buttonSubmit;
 
@@ -36,6 +42,7 @@ public class CalendarActivity extends Activity
     private int mYear, mMonth, mDay, mHour, mMinute;
 
     Date dateSelected;
+    boolean fromProfile = false;
 
     // constructor
 
@@ -54,6 +61,9 @@ public class CalendarActivity extends Activity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
+        // check if information is received from Profile Edit
+        receiveIntent();
 
         // get the references of buttons
         buttonSelectDate=(Button)findViewById(R.id.buttonSelectDate);
@@ -79,30 +89,87 @@ public class CalendarActivity extends Activity
         });
 
         //Todo: check for duplicates
+        //Todo: make sure select date and select time are clicked to avoid erros
         // Set ClickListener for submit button
         buttonSubmit.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+
                 if (dateSelected != null) {
-                    ParseObject appointment = new ParseObject("DatesAvailable");
-                    ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
-                    postACL.setPublicReadAccess(true);
-                    postACL.setPublicWriteAccess(false);
-                    appointment.setACL(postACL);
-                    appointment.put("Date", dateSelected);
-                    appointment.saveInBackground();
-                    Log.i(TAG, ParseUser.getCurrentUser().toString());
-                    Log.i(TAG, "Date: " + dateSelected);
-                    Log.i(TAG, "Uploaded to Parse!");
-                }
-                else {
-                    Log.i(TAG, "Date and time not inputted.");
+                    if (fromProfile) {
+
+                        Log.i(TAG, "In from profile, objectId: " + objectId);
+
+                        ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
+                        // Retrieve the object by id
+                        query.getInBackground(objectId, new GetCallback<ParseObject>() {
+                            public void done(ParseObject object, ParseException e) {
+                                if (e == null) {
+                                    object.put("Date", dateSelected);
+                                    Toast.makeText(getApplicationContext(), "Uploading date, please wait...", Toast.LENGTH_LONG).show();
+                                    object.saveInBackground();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+                                    Log.d(TAG, "Error: " + e.getMessage());
+                                }
+                            }
+                        });
+
+                    } else {
+                        if (dateSelected != null) {
+                            ParseObject appointment = new ParseObject("DatesAvailable");
+                            ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
+                            postACL.setPublicReadAccess(true);
+                            postACL.setPublicWriteAccess(false);
+                            appointment.setACL(postACL);
+                            appointment.put("Date", dateSelected);
+                            appointment.saveInBackground();
+                            Log.i(TAG, ParseUser.getCurrentUser().toString());
+                            Log.i(TAG, "Date: " + dateSelected);
+                            Log.i(TAG, "Uploaded to Parse!");
+                        }
+                        else {
+                            Log.i(TAG, "Date and time not inputted.");
+                        }
+                    }
+                } else {
+                    Toast.makeText(getApplicationContext(), "Error: please fill in date", Toast.LENGTH_LONG).show();
                 }
             }
+
+
+
         });
         //test parse
     }
 
+    private void receiveIntent() {
+
+        Bundle extras = getIntent().getExtras();
+
+        if (extras != null) {
+            // flag that Calendar was accessed from profile
+            fromProfile = true;
+
+            String profileDate = extras.getString("DATE_FROM_PROFILE");
+            objectId = extras.getString("OBJECTID_FROM_PROFILE");
+            Log.i(TAG, "object id receive intent: " + objectId);
+
+            Calendar date = Calendar.getInstance();
+            try {
+                date.setTime(dateFormat.parse(profileDate));
+
+            } catch (java.text.ParseException e) {
+                e.printStackTrace();
+            }
+            mYear = date.get(Calendar.YEAR);
+            Log.i(TAG, "Date converted in calendar: " + Integer.toString(mYear));
+            mMonth = date.get(Calendar.MONTH);
+            mDay = date.get(Calendar.DAY_OF_MONTH);
+            mHour = date.get(Calendar.HOUR_OF_DAY);
+            mMinute = date.get(Calendar.MINUTE);
+        }
+    }
 
     // Register  DatePickerDialog listener
     private DatePickerDialog.OnDateSetListener mDateSetListener =

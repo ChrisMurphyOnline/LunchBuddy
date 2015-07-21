@@ -1,5 +1,8 @@
 package com.example.alantang.lunchbuddy;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -38,6 +41,10 @@ public class ProfileActivity extends ActionBarActivity implements
     String formattedDate;
 
     ParseQueries parseQueries = new ParseQueries();
+//    public static String objectId = "";
+    boolean deleteDialogue = false;
+    String value = "";
+    Date date;
 
 
     // placeholders before the 2 listviews are populated
@@ -125,22 +132,19 @@ public class ProfileActivity extends ActionBarActivity implements
 
     @Override
     public void onEditClickListener(int position, String value) {
+        Date date = convertStringToDate(value);
+        setDate(date);
+        AlertDialog editBox = editOption();
+        editBox.show();
 
-        Toast.makeText(ProfileActivity.this, "Button click " + value,
-                Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onDeleteClickListener(int position, String value) {
-        Date date = convertStringToDate(value);
-        parseQueries.deleteObject(date);
-        Toast.makeText(ProfileActivity.this, "Deleted!",
-                Toast.LENGTH_SHORT).show();
-        mListDatesAvailable.clear();
-        mAvailableAdaptor.clear();
-        parseQueries.retrieveDatesAvailable();
-//        mAvailableAdaptor.notifyDataSetChanged();
-
+        resetValue();
+        setValue(value);
+        AlertDialog deleteBox = deleteOption();
+        deleteBox.show();
     }
 
     public Date convertStringToDate (String date) {
@@ -152,6 +156,102 @@ public class ProfileActivity extends ActionBarActivity implements
             e.printStackTrace();
         }
         return result;
+    }
+
+    public void setValue(String val) {
+        value = val;
+    }
+
+    public void resetValue() {
+        value = "";
+    }
+
+    public void setDate(Date val) {
+        date = val;
+    }
+    private void deleteObject(String value) {
+        Date date = convertStringToDate(value);
+        parseQueries.deleteObject(date);
+        Toast.makeText(ProfileActivity.this, "Item deleted!",
+                Toast.LENGTH_SHORT).show();
+        mListDatesAvailable.clear();
+        mAvailableAdaptor.clear();
+        parseQueries.retrieveDatesAvailable();
+    }
+
+
+    // opens up Calendar dialogue to edit date
+    private void editObject(Date date) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
+        query.whereEqualTo("Date", date);
+        query.findInBackground(new FindCallback<ParseObject>() {
+            public void done(List<ParseObject> objects, ParseException e) {
+                if (e == null) {
+                    Log.d(TAG, "Retrieved " + objects.size() + " objects");
+                    if (objects.size() > 0) {
+                        String objectId = objects.get(0).getObjectId();
+                        String date = objects.get(0).getDate("Date").toString();
+                        Log.d(TAG, "Date: " + objectId);
+                        Log.d(TAG, "Object ID: " + objectId);
+                        Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
+                        Bundle extras = new Bundle();
+                        extras.putString("DATE_FROM_PROFILE", date);
+                        extras.putString("OBJECTID_FROM_PROFILE", objectId);
+                        intent.putExtras(extras);
+                        startActivity(intent);
+                    } else {
+                        Log.d(TAG, "No object found!");
+                    }
+                } else {
+                    Log.d(TAG, "Error: " + e.getMessage());
+                }
+            }
+        });
+    }
+
+    private AlertDialog deleteOption()
+    {
+        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
+                //set message, title, and icon
+                .setTitle("Delete")
+                .setMessage("Are you sure you want to delete?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        String val = ProfileActivity.this.value;
+                        ProfileActivity.this.deleteObject(val);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+        return myQuittingDialogBox;
+    }
+
+    private AlertDialog editOption()
+    {
+        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
+                //set message, title, and icon
+                .setTitle("Edit")
+                .setMessage("Would you like to edit the item?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        Date date  = ProfileActivity.this.date;
+                        Log.i(TAG, "Date in editDialogue: " + date.toString());
+                        ProfileActivity.this.editObject(date);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+        return myQuittingDialogBox;
     }
 
 
@@ -209,6 +309,7 @@ public class ProfileActivity extends ActionBarActivity implements
 
             return null;
         }
+
 
     }
 
