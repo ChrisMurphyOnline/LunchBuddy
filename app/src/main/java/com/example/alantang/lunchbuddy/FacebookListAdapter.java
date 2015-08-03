@@ -1,6 +1,7 @@
 package com.example.alantang.lunchbuddy;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.hardware.camera2.params.Face;
 import android.content.Context;
 import android.util.Log;

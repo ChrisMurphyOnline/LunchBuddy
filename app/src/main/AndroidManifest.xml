@@ -57,6 +57,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.alantang.lunchbuddy.MainActivity" />
         </activity>
+        <activity
+            android:name=".FriendsDetailActivity"
+            android:label="@string/title_activity_friends_detail"
+            android:parentActivityName=".FriendsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.alantang.lunchbuddy.FriendsActivity" />
+        </activity>
     </application>
 
 </manifest>

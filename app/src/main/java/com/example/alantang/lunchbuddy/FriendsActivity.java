@@ -2,11 +2,14 @@ package com.example.alantang.lunchbuddy;
 
 import android.hardware.camera2.params.Face;
 import android.os.AsyncTask;
+import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -24,6 +27,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,7 +35,10 @@ import java.util.List;
 import com.example.alantang.lunchbuddy.FacebookListAdapter;
 import com.example.alantang.lunchbuddy.FacebookFriend;
 
-public class FriendsActivity extends ActionBarActivity {
+import android.content.Intent;
+
+@SuppressWarnings("serial")
+public class FriendsActivity extends ActionBarActivity implements Serializable {
 
     private static final String TAG = "log_message";
 
@@ -45,21 +52,25 @@ public class FriendsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
-//        FacebookFriend testFriend1 = new FacebookFriend("1234", "TestUser1");
-//        FacebookFriend testFriend2 = new FacebookFriend("1234", "TestUser2");
-//
-//        facebookIds.add(testFriend1);
-//        facebookIds.add(testFriend2);
+
 
         mListViewFacebookIds = (ListView)findViewById(R.id.listView3);
         facebookAdaptor = new FacebookListAdapter(FriendsActivity.this, R.layout.child_friendslistview, facebookIds);
         mListViewFacebookIds.setAdapter(facebookAdaptor);
 
+
 //        downloads list of Facebook friends
         new DownloadFriendsList().execute();
 
-
-
+        mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object listItem = mListViewFacebookIds.getItemAtPosition(position);
+                Intent intent = new Intent(view.getContext(), FriendsDetailActivity.class);
+                intent.putExtra("datesDetail", (Serializable) listItem);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -118,24 +129,6 @@ public class FriendsActivity extends ActionBarActivity {
             }
         }
     }
-
-//    private class SyncFacebookData extends AsyncTask<Void, Void, ArrayList<FacebookFriend>> {
-//
-//        @Override
-//        protected ArrayList<FacebookFriend> doInBackground (Void... params){
-//            for (int i = 0; i < facebookIds.size(); i++) {
-//                Log.d(TAG, "Id: " + facebookIds.get(i).id + ", Name: " + facebookIds.get(i).name);
-//                parseQueries.retrieveUsername(facebookIds.get(i).id, facebookIds.get(i));
-//            }
-//            return facebookIds;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(ArrayList<FacebookFriend> facebookFriendArrayList) {
-//
-//        }
-//
-//    }
 
     public class ParseQueries <T extends ParseObject> extends Object {
 
@@ -197,10 +190,6 @@ public class FriendsActivity extends ActionBarActivity {
 //                            Log.d(TAG, "Updated Friend 1 dates: " + facebookIds.get(0).dates.toString());
 //                            Log.d(TAG, "Updated Friend 2 dates: " + facebookIds.get(1).dates.toString());
 //                        }
-
-
-
-
 
                     } else {
                         Log.d(TAG, "Error: " + e.getMessage());

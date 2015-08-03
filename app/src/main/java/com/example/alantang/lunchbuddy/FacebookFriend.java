@@ -1,12 +1,13 @@
 package com.example.alantang.lunchbuddy;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
  * Created by Alan on 8/3/2015.
  */
-public class FacebookFriend {
+public class FacebookFriend implements Serializable {
     String id;
     String username;
     String name;
