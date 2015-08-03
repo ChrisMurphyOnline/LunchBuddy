@@ -18,6 +18,7 @@ public class FacebookFriend {
         this.name = thisName;
         this.username = "";
         this.dates = new ArrayList<Date>();
+        this.numberOfDates = 0;
     }
 
     public void setUsername(String thisUsername) {

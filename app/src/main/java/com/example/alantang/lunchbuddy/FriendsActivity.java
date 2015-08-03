@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -23,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +36,7 @@ public class FriendsActivity extends ActionBarActivity {
     private static final String TAG = "log_message";
 
     FacebookListAdapter facebookAdaptor;
+    ListView mListViewFacebookIds;
     ArrayList<FacebookFriend> facebookIds = new ArrayList<FacebookFriend>();
 
     ParseQueries parseQueries = new ParseQueries();
@@ -42,7 +45,17 @@ public class FriendsActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
-        //downloads list of Facebook friends
+//        FacebookFriend testFriend1 = new FacebookFriend("1234", "TestUser1");
+//        FacebookFriend testFriend2 = new FacebookFriend("1234", "TestUser2");
+//
+//        facebookIds.add(testFriend1);
+//        facebookIds.add(testFriend2);
+
+        mListViewFacebookIds = (ListView)findViewById(R.id.listView3);
+        facebookAdaptor = new FacebookListAdapter(FriendsActivity.this, R.layout.child_friendslistview, facebookIds);
+        mListViewFacebookIds.setAdapter(facebookAdaptor);
+
+//        downloads list of Facebook friends
         new DownloadFriendsList().execute();
 
 
@@ -74,10 +87,10 @@ public class FriendsActivity extends ActionBarActivity {
 
 
 
-    private class DownloadFriendsList extends AsyncTask<Void, Void, ArrayList<FacebookFriend>> {
+    private class DownloadFriendsList extends AsyncTask<Void, Void, Void> {
 
         @Override
-        protected ArrayList<FacebookFriend> doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
             GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONArrayCallback() {
                 @Override
                 public void onCompleted(JSONArray objects, GraphResponse graphResponse) {
@@ -94,31 +107,35 @@ public class FriendsActivity extends ActionBarActivity {
                     }
                 }}
                 ).executeAndWait();
-
-
-
-//            for (int i = 0; i < facebookIds.size(); i++) {
-//                Log.d(TAG, "Updated Friend 1 ID: " + facebookIds.get(0).id);
-//                Log.d(TAG, "Updated Friend 2 ID: " + facebookIds.get(1).id);
-//                Log.d(TAG, "Updated Friend 1 name: " + facebookIds.get(0).name);
-//                Log.d(TAG, "Updated Friend 2 name: " + facebookIds.get(1).name);
-//                Log.d(TAG, "Updated Friend 1 username: " + facebookIds.get(0).username);
-//                Log.d(TAG, "Updated Friend 2 username: " + facebookIds.get(1).username);
-//                Log.d(TAG, "Updated Friend 1 dates: " + facebookIds.get(0).dates.toString());
-//                Log.d(TAG, "Updated Friend 2 dates: " + facebookIds.get(1).dates.toString());
-//            }
-
-            return facebookIds;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<FacebookFriend> facebookFriendArrayList) {
+        protected void onPostExecute(Void v) {
             for (int i = 0; i < facebookIds.size(); i++) {
                 Log.d(TAG, "Id: " + facebookIds.get(i).id + ", Name: " + facebookIds.get(i).name);
                 parseQueries.retrieveUsername(facebookIds.get(i).id, facebookIds.get(i));
             }
         }
     }
+
+//    private class SyncFacebookData extends AsyncTask<Void, Void, ArrayList<FacebookFriend>> {
+//
+//        @Override
+//        protected ArrayList<FacebookFriend> doInBackground (Void... params){
+//            for (int i = 0; i < facebookIds.size(); i++) {
+//                Log.d(TAG, "Id: " + facebookIds.get(i).id + ", Name: " + facebookIds.get(i).name);
+//                parseQueries.retrieveUsername(facebookIds.get(i).id, facebookIds.get(i));
+//            }
+//            return facebookIds;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<FacebookFriend> facebookFriendArrayList) {
+//
+//        }
+//
+//    }
 
     public class ParseQueries <T extends ParseObject> extends Object {
 
@@ -162,19 +179,27 @@ public class FriendsActivity extends ActionBarActivity {
                             if (objects.get(i).get("Creator").equals(finalUsername)) {
                                 Log.d(TAG, "Date: " + objects.get(i).getDate("Date").toString());
                                 friend.addDate(objects.get(i).getDate("Date"));
+                                friend.updateNumberOfDates();
                             }
                         }
 
-                        for (int i = 0; i < facebookIds.size(); i++) {
-                            Log.d(TAG, "Updated Friend 1 ID: " + facebookIds.get(0).id);
-                            Log.d(TAG, "Updated Friend 2 ID: " + facebookIds.get(1).id);
-                            Log.d(TAG, "Updated Friend 1 name: " + facebookIds.get(0).name);
-                            Log.d(TAG, "Updated Friend 2 name: " + facebookIds.get(1).name);
-                            Log.d(TAG, "Updated Friend 1 username: " + facebookIds.get(0).username);
-                            Log.d(TAG, "Updated Friend 2 username: " + facebookIds.get(1).username);
-                            Log.d(TAG, "Updated Friend 1 dates: " + facebookIds.get(0).dates.toString());
-                            Log.d(TAG, "Updated Friend 2 dates: " + facebookIds.get(1).dates.toString());
-                        }
+
+                        ///// do code here... because somehow onPostExecute doesn't wait for ParseQueries to complete :(
+
+                        facebookAdaptor.notifyDataSetChanged();
+//                        for (int i = 0; i < facebookIds.size(); i++) {
+//                            Log.d(TAG, "Updated Friend 1 ID: " + facebookIds.get(0).id);
+//                            Log.d(TAG, "Updated Friend 2 ID: " + facebookIds.get(1).id);
+//                            Log.d(TAG, "Updated Friend 1 name: " + facebookIds.get(0).name);
+//                            Log.d(TAG, "Updated Friend 2 name: " + facebookIds.get(1).name);
+//                            Log.d(TAG, "Updated Friend 1 username: " + facebookIds.get(0).username);
+//                            Log.d(TAG, "Updated Friend 2 username: " + facebookIds.get(1).username);
+//                            Log.d(TAG, "Updated Friend 1 dates: " + facebookIds.get(0).dates.toString());
+//                            Log.d(TAG, "Updated Friend 2 dates: " + facebookIds.get(1).dates.toString());
+//                        }
+
+
+
 
 
                     } else {
