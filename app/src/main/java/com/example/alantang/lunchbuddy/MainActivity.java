@@ -1,21 +1,34 @@
 package com.example.alantang.lunchbuddy;
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.parse.LogInCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFacebookUtils;
 import com.parse.ParseUser;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,12 +47,13 @@ public class MainActivity extends ActionBarActivity {
         Parse.enableLocalDatastore(this);
 
         Parse.initialize(this, "cRs6iJZlt7MHBAqP8ch1SKLREZ6yADDtgl66Cf82", "NVjTb0Y3aMVWHrpEUCjxiIWQPEuj1aOIjBCmkD8Z");
+
         ParseFacebookUtils.initialize(getApplicationContext());
 
         final List<String> permissions = Arrays.asList("public_profile", "email");
 
 
-        // get Development Key Hash
+//         get Development Key Hash
 //        try {
 //            PackageInfo info = getPackageManager().getPackageInfo("com.example.alantang.lunchbuddy",
 //                    PackageManager.GET_SIGNATURES);
@@ -54,19 +68,24 @@ public class MainActivity extends ActionBarActivity {
 //            Log.e("Test", e.getMessage());
 //        }
 
+        ParseUser.logOut();
 
         ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions, new LogInCallback() {
             @Override
             public void done(ParseUser user, ParseException err) {
                 if (user == null) {
                     Log.d(TAG, "Uh oh. The user cancelled the Facebook login.");
+                    Log.e(TAG, err.getMessage());
                 } else if (user.isNew()) {
+                    saveFacebookId();
                     Log.d(TAG, "User signed up and logged in through Facebook!");
                 } else {
+                    saveFacebookId();
                     Log.d(TAG, "User logged in through Facebook!");
                 }
             }
         });
+
 
 //        sets content to be activity_main.xml
         setContentView(R.layout.activity_main);
@@ -77,10 +96,10 @@ public class MainActivity extends ActionBarActivity {
         Button buttonFriends = (Button) findViewById(R.id.buttonFriends);
 
         buttonProfile.setOnClickListener(new View.OnClickListener() {
-             @Override
-             public void onClick(View v) {
-                 Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
-                 startActivity(i);
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
+                startActivity(i);
             }
         });
 
@@ -100,13 +119,13 @@ public class MainActivity extends ActionBarActivity {
 //            }
 //        });
 //
-//        buttonFriends.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent i = new Intent(getApplicationContext(), Friends.class);
-//                startActivity(i);
-//            }
-//        });
+        buttonFriends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), FriendsActivity.class);
+                startActivity(i);
+            }
+        });
 
         // Intent for User to be accessible from other activities
 //        Intent i = new Intent(getApplicationContext(), MainActivity.class);
@@ -116,6 +135,7 @@ public class MainActivity extends ActionBarActivity {
 
         Log.i(TAG, "onCreate");
     }
+
     // Facebook calls this feature "Single sign-on" (SSO), and requires you to override onActivityResult() in your calling Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -150,5 +170,23 @@ public class MainActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveFacebookId() {
+        GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
+            @Override
+            public void onCompleted(JSONObject user, GraphResponse response) {
+                response.getError();
+                Log.e("JSON:", user.toString());
+                try {
+                    String userId = user.getString("id");
+                    Log.d(TAG, userId);
+                    ParseUser.getCurrentUser().put("FacebookId", userId);
+                    ParseUser.getCurrentUser().saveInBackground();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).executeAsync();
     }
 }

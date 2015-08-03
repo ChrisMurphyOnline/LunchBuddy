@@ -39,7 +39,7 @@ public class CalendarActivity extends Activity
     // variables to save user selected date and time
     public int year, month, day, hour, minute;
     // declare  the variables to Show/Set the date and time when Time and  Date Picker Dialog first appears
-    private int mYear, mMonth, mDay, mHour, mMinute;
+    int mYear, mMonth, mDay, mHour, mMinute;
 
     Date dateSelected;
     boolean fromProfile = false;
@@ -49,7 +49,7 @@ public class CalendarActivity extends Activity
     public CalendarActivity()
     {
         // Assign current Date and Time Values to Variables
-        final Calendar c = Calendar.getInstance();
+        Calendar c = Calendar.getInstance();
         mYear = c.get(Calendar.YEAR);
         mMonth = c.get(Calendar.MONTH);
         mDay = c.get(Calendar.DAY_OF_MONTH);
@@ -123,9 +123,14 @@ public class CalendarActivity extends Activity
                             postACL.setPublicWriteAccess(false);
                             appointment.setACL(postACL);
                             appointment.put("Date", dateSelected);
-                            appointment.saveInBackground();
-                            Log.i(TAG, ParseUser.getCurrentUser().toString());
+                            appointment.put("Creator", ParseUser.getCurrentUser().getUsername());
+
+
+                            Log.i(TAG, ParseUser.getCurrentUser().getUsername());
                             Log.i(TAG, "Date: " + dateSelected);
+                            Toast.makeText(getApplicationContext(), "Uploading date, please wait...", Toast.LENGTH_LONG).show();
+                            appointment.saveInBackground();
+                            Toast.makeText(getApplicationContext(), "Uploaded!", Toast.LENGTH_LONG).show();
                             Log.i(TAG, "Uploaded to Parse!");
                         }
                         else {
@@ -146,7 +151,6 @@ public class CalendarActivity extends Activity
     private void receiveIntent() {
 
         Bundle extras = getIntent().getExtras();
-
         if (extras != null) {
             // flag that Calendar was accessed from profile
             fromProfile = true;
@@ -163,11 +167,11 @@ public class CalendarActivity extends Activity
                 e.printStackTrace();
             }
             mYear = date.get(Calendar.YEAR);
-            Log.i(TAG, "Date converted in calendar: " + Integer.toString(mYear));
             mMonth = date.get(Calendar.MONTH);
             mDay = date.get(Calendar.DAY_OF_MONTH);
             mHour = date.get(Calendar.HOUR_OF_DAY);
             mMinute = date.get(Calendar.MINUTE);
+            Log.i(TAG, "Receive intent date: " + profileDate);
         }
     }
 
@@ -182,9 +186,11 @@ public class CalendarActivity extends Activity
                     month = monthOfYear;
                     day = dayOfMonth;
                     // Set the Selected Date in Select date Button
-                    dateSelected = new Date(year, month, day);
+                    dateSelected = new Date(year, month, day, hour, minute);
+                    SimpleDateFormat dateFormat2 = new SimpleDateFormat("E dd MMM yyyy");
+
 //                    buttonSelectDate.setText("Date selected: "+day+" - "+month+" - "+year);
-                    String dateDisplay = dateSelected.toString().split("00:")[0];
+                    String dateDisplay = dateFormat2.format(dateSelected);
                     buttonSelectDate.setText("Date: " + dateDisplay);
                 }
             };
@@ -192,7 +198,6 @@ public class CalendarActivity extends Activity
     // Register  TimePickerDialog listener
     private TimePickerDialog.OnTimeSetListener mTimeSetListener =
 
-            //Todo: fix time display, e.g. 12.1pm -> 12.01pm
             new TimePickerDialog.OnTimeSetListener() {
                 // the callback received when the user "sets" the TimePickerDialog in the dialog
                 public void onTimeSet(TimePicker view, int hourOfDay, int min) {
@@ -200,15 +205,18 @@ public class CalendarActivity extends Activity
                     minute = min;
                     //check if date has been filled in
                     if (year != 0 &&  month != 0 && day != 0) {
+                        SimpleDateFormat dateFormat3 = new SimpleDateFormat("hh:mm aa");
                         dateSelected = new Date(year, month, day, hour, minute);
+                        String timeDisplay = dateFormat3.format(dateSelected);
                         Log.i(TAG, "Date successfully updated with time");
                         Log.i(TAG, "Date: " + dateSelected);
+                        buttonSelectTime.setText("Time: " + timeDisplay);
                     }
                     else {
                         Log.i(TAG, "Date not inputted ");
                     }
                     // Set the Selected Date in Select date Button
-                    buttonSelectTime.setText("Time: "+hour+"."+minute);
+
                 }
             };
 

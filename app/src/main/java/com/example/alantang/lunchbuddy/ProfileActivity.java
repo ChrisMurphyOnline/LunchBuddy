@@ -16,6 +16,7 @@ import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
+import com.parse.ParseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,10 +47,6 @@ public class ProfileActivity extends ActionBarActivity implements
     String value = "";
     Date date;
 
-
-    // placeholders before the 2 listviews are populated
-    private String [] data1 ={"Hiren", "Pratik", "Dhruv", "Narendra", "Piyush", "Priyank"};
-//    private String [] data2 ={"Kirit", "Miral", "Bhushan", "Jiten", "Ajay", "Kamlesh"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,11 +169,7 @@ public class ProfileActivity extends ActionBarActivity implements
     private void deleteObject(String value) {
         Date date = convertStringToDate(value);
         parseQueries.deleteObject(date);
-        Toast.makeText(ProfileActivity.this, "Item deleted!",
-                Toast.LENGTH_SHORT).show();
-        mListDatesAvailable.clear();
-        mAvailableAdaptor.clear();
-        parseQueries.retrieveDatesAvailable();
+
     }
 
 
@@ -261,17 +254,18 @@ public class ProfileActivity extends ActionBarActivity implements
             ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
             query.findInBackground(new FindCallback<ParseObject>() {
                 public void done(List<ParseObject> objects, ParseException e) {
-
                     if (e == null) {
                         for (int i = 0; i < objects.size(); i++) {
-                            Object object = objects.get(i);
-                            Date date = ((ParseObject) object).getDate("Date");
-                            Log.d(TAG, "Original format: " + date.toString());
-                            formattedDate = dateFormat.format(date);
-                            Log.d(TAG, "Formatted day: " + formattedDate);
-                            mListDatesAvailable.add(formattedDate);
-                            Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
-                            mAvailableAdaptor.notifyDataSetChanged();
+                            ParseObject object = objects.get(i);
+                             if (object.getACL().getWriteAccess(ParseUser.getCurrentUser())) {
+                                 Date date = (object).getDate("Date");
+                                 Log.d(TAG, "Original format: " + date.toString());
+                                 formattedDate = dateFormat.format(date);
+                                 Log.d(TAG, "Formatted day: " + formattedDate);
+                                 mListDatesAvailable.add(formattedDate);
+                                 Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
+                                 mAvailableAdaptor.notifyDataSetChanged();
+                             }
                         }
                         Log.d(TAG, "Retrieved " + objects.size() + " appointments");
 
@@ -296,12 +290,17 @@ public class ProfileActivity extends ActionBarActivity implements
                         Log.d(TAG, "Retrieved " + objects.size() + " objects");
                         if (objects.size() > 0) {
                             objects.get(0).deleteInBackground();
+                            Toast.makeText(ProfileActivity.this, "Item deleted!", Toast.LENGTH_SHORT).show();
+                            mListDatesAvailable.clear();
+                            mAvailableAdaptor.clear();
+                            parseQueries.retrieveDatesAvailable();
                         } else {
                             Log.d(TAG, "No object found!");
                         }
 
 
                     } else {
+                        Toast.makeText(ProfileActivity.this, "Oops! Item does not exist. Please refresh the page.", Toast.LENGTH_SHORT).show();
                         Log.d(TAG, "Error: " + e.getMessage());
                     }
                 }
