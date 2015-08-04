@@ -10,12 +10,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import com.example.alantang.lunchbuddy.DetailListAdapter.customButtonListener;
 import com.example.alantang.lunchbuddy.DetailListAdapter;
+import com.parse.ParseACL;
+import com.parse.ParseObject;
+import com.parse.ParseUser;
 
 
 public class FriendsDetailActivity extends ActionBarActivity implements customButtonListener {
@@ -25,6 +29,7 @@ public class FriendsDetailActivity extends ActionBarActivity implements customBu
     ArrayList<String> mListDatesString = new ArrayList<String>();
     ListView mListViewDates;
     DetailListAdapter mDatesAdaptor;
+    FacebookFriend receivedFriend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +40,7 @@ public class FriendsDetailActivity extends ActionBarActivity implements customBu
 
 
         Intent intent = getIntent();
-        FacebookFriend receivedFriend = (FacebookFriend) intent.getSerializableExtra("datesDetail");
+        receivedFriend = (FacebookFriend) intent.getSerializableExtra("datesDetail");
 
         title.setText(receivedFriend.name + "'s Available Dates: ");
 
@@ -45,8 +50,9 @@ public class FriendsDetailActivity extends ActionBarActivity implements customBu
         }
         Log.d(TAG, mListDatesString.toString());
 
-        mListViewDates = (ListView) findViewById(R.id.listView4);
+        mListViewDates = (ListView) findViewById(R.id.listview_friends_detail);
         mDatesAdaptor = new DetailListAdapter(FriendsDetailActivity.this, mListDatesString);
+        mDatesAdaptor.setCustomButtonListner(FriendsDetailActivity.this);
         mListViewDates.setAdapter(mDatesAdaptor);
 
 
@@ -77,19 +83,40 @@ public class FriendsDetailActivity extends ActionBarActivity implements customBu
 
     @Override
     public void onRequestClickListener(int position, String value) {
-        AlertDialog addBox = requestOption();
-        addBox.show();
-
+        AlertDialog requestBox = requestOption(position);
+        requestBox.show();
     }
 
-    public AlertDialog requestOption() {
+    private AlertDialog requestOption(int position) {
+        final int finalPosition = position;
         AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
                 //set message, title, and icon
                 .setTitle("Request")
                 .setMessage("Would you like to send this request?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
-//
+
+                        Log.d(TAG, "Date requested: " + mListDates.get(finalPosition).toString());
+                        Log.d(TAG, "Friend name: " + receivedFriend.name);
+
+
+                        ParseObject appointment = new ParseObject("PendingAppts");
+                        ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
+                        postACL.setPublicReadAccess(true);
+                        postACL.setPublicWriteAccess(true);
+                        appointment.setACL(postACL);
+                        appointment.put("Appt", mListDates.get(finalPosition));
+                        appointment.put("PosterName", receivedFriend.name);
+                        appointment.put("PosterId", receivedFriend.username);
+
+                        appointment.put("RequestorName", ParseUser.getCurrentUser().get("FacebookName"));
+                        appointment.put("RequestorId", ParseUser.getCurrentUser().getUsername());
+
+                        Toast.makeText(getApplicationContext(), "Sending request, please wait...", Toast.LENGTH_LONG).show();
+                        appointment.saveInBackground();
+                        //todo: check if request actually sent
+                        Toast.makeText(getApplicationContext(), "Request sent!", Toast.LENGTH_LONG).show();
+                        dialog.dismiss();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

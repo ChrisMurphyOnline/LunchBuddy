@@ -54,7 +54,7 @@ public class FriendsActivity extends ActionBarActivity implements Serializable {
         setContentView(R.layout.activity_friends);
 
 
-        mListViewFacebookIds = (ListView)findViewById(R.id.listView3);
+        mListViewFacebookIds = (ListView)findViewById(R.id.listview_friends);
         facebookAdaptor = new FacebookListAdapter(FriendsActivity.this, R.layout.child_friendslistview, facebookIds);
         mListViewFacebookIds.setAdapter(facebookAdaptor);
 
@@ -94,9 +94,6 @@ public class FriendsActivity extends ActionBarActivity implements Serializable {
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
 
     private class DownloadFriendsList extends AsyncTask<Void, Void, Void> {
 

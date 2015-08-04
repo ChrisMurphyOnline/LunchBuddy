@@ -94,6 +94,7 @@ public class MainActivity extends ActionBarActivity {
         Button buttonCalendar = (Button) findViewById(R.id.buttonCalendar);
         Button buttonAvailable = (Button) findViewById(R.id.buttonAvailable);
         Button buttonFriends = (Button) findViewById(R.id.buttonFriends);
+        Button buttonPending = (Button) findViewById(R.id.buttonPending);
 
         buttonProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,6 +124,14 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onClick(View v) {
                 Intent i = new Intent(getApplicationContext(), FriendsActivity.class);
+                startActivity(i);
+            }
+        });
+
+        buttonPending.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(), PendingActivity.class);
                 startActivity(i);
             }
         });
@@ -180,8 +189,10 @@ public class MainActivity extends ActionBarActivity {
                 Log.e("JSON:", user.toString());
                 try {
                     String userId = user.getString("id");
+                    String facebookName = user.getString("name");
                     Log.d(TAG, userId);
                     ParseUser.getCurrentUser().put("FacebookId", userId);
+                    ParseUser.getCurrentUser().put("FacebookName", facebookName);
                     ParseUser.getCurrentUser().saveInBackground();
                 } catch (JSONException e) {
                     e.printStackTrace();

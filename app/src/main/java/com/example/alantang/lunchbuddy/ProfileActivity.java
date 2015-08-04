@@ -35,8 +35,8 @@ public class ProfileActivity extends ActionBarActivity implements
     ListView mListViewAppointments, mListViewAvailable;
     ArrayList mListAppointments = new ArrayList<String>();
     ArrayList mListDatesAvailable = new ArrayList<String>();
-    ListAdapter mAppointmentsAdaptor;
-    ListAdapter mAvailableAdaptor;
+    ListAdapter mAppointmentsAdapter;
+    ListAdapter mAvailableAdapter;
 
     SimpleDateFormat dateFormat = new SimpleDateFormat("E dd MMM yyyy hh:mm aa z");
     String formattedDate;
@@ -60,20 +60,20 @@ public class ProfileActivity extends ActionBarActivity implements
         for (int i = 0; i < mListAppointments.size(); i++) {
             Log.d(TAG, mListAppointments.get(i).toString());
         }
-//        mAppointmentsAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
-//        mAvailableAdaptor = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
+//        mAppointmentsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
+//        mAvailableAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
 
-        mListViewAppointments = (ListView)findViewById(R.id.listView1);
-        mListViewAvailable = (ListView)findViewById(R.id.listView2);
+        mListViewAppointments = (ListView)findViewById(R.id.listview_current_appointments);
+        mListViewAvailable = (ListView)findViewById(R.id.listview_dates_available);
 
-        mAvailableAdaptor = new ListAdapter(ProfileActivity.this, mListDatesAvailable);
-        mAvailableAdaptor.setCustomButtonListner(ProfileActivity.this);
+        mAvailableAdapter = new ListAdapter(ProfileActivity.this, mListDatesAvailable);
+        mAvailableAdapter.setCustomButtonListner(ProfileActivity.this);
 
-//        mAppointmentsAdaptor = new ListAdapter(ProfileActivity.this, mListAppointments);
-//        mAppointmentsAdaptor.setCustomButtonListner(ProfileActivity.this);
+//        mAppointmentsAdapter = new ListAdapter(ProfileActivity.this, mListAppointments);
+//        mAppointmentsAdapter.setCustomButtonListner(ProfileActivity.this);
 
-        mListViewAvailable.setAdapter(mAvailableAdaptor);
-//        mListViewAppointments.setAdapter(mAppointmentsAdaptor);
+        mListViewAvailable.setAdapter(mAvailableAdapter);
+//        mListViewAppointments.setAdapter(mAppointmentsAdapter);
 
 
 
@@ -264,7 +264,7 @@ public class ProfileActivity extends ActionBarActivity implements
                                  Log.d(TAG, "Formatted day: " + formattedDate);
                                  mListDatesAvailable.add(formattedDate);
                                  Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
-                                 mAvailableAdaptor.notifyDataSetChanged();
+                                 mAvailableAdapter.notifyDataSetChanged();
                              }
                         }
                         Log.d(TAG, "Retrieved " + objects.size() + " appointments");
@@ -292,7 +292,7 @@ public class ProfileActivity extends ActionBarActivity implements
                             objects.get(0).deleteInBackground();
                             Toast.makeText(ProfileActivity.this, "Item deleted!", Toast.LENGTH_SHORT).show();
                             mListDatesAvailable.clear();
-                            mAvailableAdaptor.clear();
+                            mAvailableAdapter.clear();
                             parseQueries.retrieveDatesAvailable();
                         } else {
                             Log.d(TAG, "No object found!");

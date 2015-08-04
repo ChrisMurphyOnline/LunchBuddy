@@ -20,14 +20,13 @@
         android:weightSum="1">
 
         <TextView
-            android:id="@+id/displayFriendDetail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
-            />
+            android:text="Pending Accepts" />
 
         <ListView
-            android:id="@+id/listview_friends_detail"
+            android:id="@+id/listview_pending_accepts"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
@@ -37,7 +36,42 @@
 
         </ListView>
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dip"
+            android:gravity="center_vertical"
+            android:text="Pending Requests" />
+
+        <ListView
+            android:id="@+id/listview_pending_requests"
+            android:layout_width="match_parent"
+            android:layout_height="225dp"
+            android:clipToPadding="false"
+            android:layout_marginTop="10dip"
+            android:background="#4A9C67"
+            android:layout_weight="0.75"
+            android:dividerHeight="0dp">.
+        </ListView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="Rejected Requests" />
+
+        <ListView
+            android:id="@+id/listview_rejected_requests"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:layout_marginTop="10dip"
+            android:background="#B29090"
+            android:layout_weight="1.60">
+        </ListView>
+
     </LinearLayout>
 
+    <!--</ScrollView>-->
 
 </RelativeLayout>
