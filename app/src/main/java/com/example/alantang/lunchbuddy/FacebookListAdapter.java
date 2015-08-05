@@ -31,16 +31,7 @@ public class FacebookListAdapter extends ArrayAdapter<FacebookFriend> {
     private ArrayList<FacebookFriend> friends = new ArrayList<FacebookFriend>();
 
     public FacebookListAdapter (Context context, int resource, ArrayList<FacebookFriend> data) {
-//        super(activity, textViewResourceId);
-//        try {
-//            this.activity = activity;
-//            this.friends = friends;
-//
-//            inflater = (LayoutInflater) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+
         super(context, resource, data);
         this.friends = data;
         this.context = context;

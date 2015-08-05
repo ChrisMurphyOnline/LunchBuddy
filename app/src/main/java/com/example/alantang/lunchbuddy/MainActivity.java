@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -75,13 +76,13 @@ public class MainActivity extends ActionBarActivity {
             public void done(ParseUser user, ParseException err) {
                 if (user == null) {
                     Log.d(TAG, "Uh oh. The user cancelled the Facebook login.");
-                    Log.e(TAG, err.getMessage());
+                    Toast.makeText(getApplicationContext(), "Error: " + err.getMessage(), Toast.LENGTH_LONG).show();
                 } else if (user.isNew()) {
                     saveFacebookId();
-                    Log.d(TAG, "User signed up and logged in through Facebook!");
+                    Toast.makeText(getApplicationContext(), "User signed up and logged in through Facebook!", Toast.LENGTH_LONG).show();
                 } else {
                     saveFacebookId();
-                    Log.d(TAG, "User logged in through Facebook!");
+                    Toast.makeText(getApplicationContext(), "User logged in through Facebook!", Toast.LENGTH_LONG).show();
                 }
             }
         });

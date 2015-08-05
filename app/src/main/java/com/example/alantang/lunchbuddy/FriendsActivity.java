@@ -1,5 +1,6 @@
 package com.example.alantang.lunchbuddy;
 
+import android.app.Activity;
 import android.hardware.camera2.params.Face;
 import android.os.AsyncTask;
 import android.os.Parcelable;
@@ -38,7 +39,7 @@ import com.example.alantang.lunchbuddy.FacebookFriend;
 import android.content.Intent;
 
 @SuppressWarnings("serial")
-public class FriendsActivity extends ActionBarActivity implements Serializable {
+public class FriendsActivity extends Activity implements Serializable {
 
     private static final String TAG = "log_message";
 

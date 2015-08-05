@@ -1,13 +1,17 @@
 package com.example.alantang.lunchbuddy;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -24,21 +28,23 @@ import java.util.Date;
 import java.util.List;
 
 
-public class ProfileActivity extends ActionBarActivity implements
-    customButtonListener
+public class ProfileActivity extends Activity implements customButtonListener, ConfirmedListAdapter.customButtonListener
 {
 
     //Todo: remove / change title bar
 
     private static final String TAG = "log_message";
+    ArrayList<ParseObject> acceptedAppts = new ArrayList<ParseObject>() ;
 
     ListView mListViewAppointments, mListViewAvailable;
     ArrayList mListAppointments = new ArrayList<String>();
     ArrayList mListDatesAvailable = new ArrayList<String>();
-    ListAdapter mAppointmentsAdapter;
+    ConfirmedListAdapter mAppointmentsAdapter;
     ListAdapter mAvailableAdapter;
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat("E dd MMM yyyy hh:mm aa z");
+//    SimpleDateFormat dateFormat = new SimpleDateFormat("E dd MMM yyyy hh:mm aa z");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("E, d MMM yyyy hh:mm aaa");
+
     String formattedDate;
 
     ParseQueries parseQueries = new ParseQueries();
@@ -50,60 +56,37 @@ public class ProfileActivity extends ActionBarActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+
+
         setContentView(R.layout.activity_profile);
 
         // download list of appointments
 
         parseQueries.retrieveDatesAvailable();
+        parseQueries.retrieveAcceptedAppts();
 
-        for (int i = 0; i < mListAppointments.size(); i++) {
-            Log.d(TAG, mListAppointments.get(i).toString());
-        }
+
 //        mAppointmentsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
 //        mAvailableAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
 
         mListViewAppointments = (ListView)findViewById(R.id.listview_current_appointments);
         mListViewAvailable = (ListView)findViewById(R.id.listview_dates_available);
 
+
+        mAppointmentsAdapter = new ConfirmedListAdapter(ProfileActivity.this, mListAppointments);
+        mAppointmentsAdapter.setCustomButtonListner(ProfileActivity.this);
         mAvailableAdapter = new ListAdapter(ProfileActivity.this, mListDatesAvailable);
         mAvailableAdapter.setCustomButtonListner(ProfileActivity.this);
 
-//        mAppointmentsAdapter = new ListAdapter(ProfileActivity.this, mListAppointments);
-//        mAppointmentsAdapter.setCustomButtonListner(ProfileActivity.this);
-
         mListViewAvailable.setAdapter(mAvailableAdapter);
-//        mListViewAppointments.setAdapter(mAppointmentsAdapter);
-
-
-
-//        ListUtils.setDynamicHeight(mListViewAppointments);
-//        ListUtils.setDynamicHeight(mListViewAvailable);
+        mListViewAppointments.setAdapter(mAppointmentsAdapter);
 
 
     }
 
-//    // added code for listviews
-//    public static class ListUtils {
-//        public static void setDynamicHeight(ListView mListView) {
-//            ListAdapter mListAdapter = mListView.getAdapter();
-//            if (mListAdapter == null) {
-//                // when adapter is null
-//                return;
-//            }
-//            int height = 0;
-//            int desiredWidth = MeasureSpec.makeMeasureSpec(mListView.getWidth(), MeasureSpec.UNSPECIFIED);
-//            for (int i = 0; i < mListAdapter.getCount(); i++) {
-//                View listItem = mListAdapter.getView(i, null, mListView);
-//                listItem.measure(desiredWidth, MeasureSpec.UNSPECIFIED);
-//                height += listItem.getMeasuredHeight();
-//            }
-//            ViewGroup.LayoutParams params = mListView.getLayoutParams();
-//            params.height = height + (mListView.getDividerHeight() * (mListAdapter.getCount() - 1));
-//            mListView.setLayoutParams(params);
-//            mListView.requestLayout();
-//        }
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -143,6 +126,13 @@ public class ProfileActivity extends ActionBarActivity implements
         AlertDialog deleteBox = deleteOption();
         deleteBox.show();
     }
+
+    @Override
+    public void onClearClickListener(int position, String value) {
+        AlertDialog clearBox = clearOption(position);
+        clearBox.show();
+    }
+
 
     public Date convertStringToDate (String date) {
         Date result = new Date();
@@ -247,10 +237,36 @@ public class ProfileActivity extends ActionBarActivity implements
         return myQuittingDialogBox;
     }
 
+    private AlertDialog clearOption(int position)
+    {
+        final int finalPosition = position;
+        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
+                //set message, title, and icon
+                .setTitle("Clear")
+                .setMessage("Clear this appointment?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        acceptedAppts.get(finalPosition).deleteInBackground();
+                        Toast.makeText(getApplicationContext(), "Clearing appointment, please wait...", Toast.LENGTH_LONG).show();
+                        //todo: check if request actually sent
+                        Toast.makeText(getApplicationContext(), "Appointment cleared!", Toast.LENGTH_LONG).show();
+                        parseQueries.retrieveAcceptedAppts();
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+        return myQuittingDialogBox;
+    }
+
 
     public class ParseQueries <T extends ParseObject> extends Object {
 
-        public ParseQuery<ParseObject> retrieveDatesAvailable() {
+        public void retrieveDatesAvailable() {
             ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
             query.findInBackground(new FindCallback<ParseObject>() {
                 public void done(List<ParseObject> objects, ParseException e) {
@@ -275,7 +291,41 @@ public class ProfileActivity extends ActionBarActivity implements
                     }
                 }
             });
-            return null;
+        }
+
+        public void retrieveAcceptedAppts() {
+            ParseQuery<ParseObject> query = ParseQuery.getQuery("AcceptedAppts");
+            query.findInBackground(new FindCallback<ParseObject>() {
+                public void done(List<ParseObject> objects, ParseException e) {
+                    if (e == null) {
+                        mListAppointments.clear();
+                        acceptedAppts.clear();
+                        for (int i = 0; i < objects.size(); i++) {
+                            ParseObject object = objects.get(i);
+                            if (object.getString("PosterId").equals(ParseUser.getCurrentUser().getUsername())) {
+                                if (object.getString("Owner").equals(ParseUser.getCurrentUser().getUsername())) {
+                                    String companion = object.getString("RequestorName");
+                                    String displayDate = dateFormat.format(object.getDate("Appt"));
+                                    acceptedAppts.add(object);
+                                    mListAppointments.add(companion + ", " + displayDate);
+                                }
+
+                            } else if (object.getString("RequestorId").equals(ParseUser.getCurrentUser().getUsername())) {
+                                if (object.getString("Owner").equals(ParseUser.getCurrentUser().getUsername())) {
+                                    String companion = object.getString("PosterName");
+                                    String displayDate = dateFormat.format(object.getDate("Appt"));
+                                    acceptedAppts.add(object);
+                                    mListAppointments.add(companion + ", " + displayDate);
+                                }
+                            }
+                        }
+                        mAppointmentsAdapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
+                        Log.d(TAG, "Error: " + e.getMessage());
+                    }
+                }
+            });
         }
 
 

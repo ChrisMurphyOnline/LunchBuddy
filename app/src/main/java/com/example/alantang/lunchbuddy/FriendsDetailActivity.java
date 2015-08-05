@@ -11,8 +11,10 @@ import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.Activity;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import com.example.alantang.lunchbuddy.DetailListAdapter.customButtonListener;
@@ -22,7 +24,7 @@ import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 
-public class FriendsDetailActivity extends ActionBarActivity implements customButtonListener {
+public class FriendsDetailActivity extends Activity implements customButtonListener {
 
     private static final String TAG = "log_message";
     ArrayList<Date> mListDates = new ArrayList<Date>();
@@ -30,6 +32,7 @@ public class FriendsDetailActivity extends ActionBarActivity implements customBu
     ListView mListViewDates;
     DetailListAdapter mDatesAdaptor;
     FacebookFriend receivedFriend;
+    SimpleDateFormat dateFormat = new SimpleDateFormat("E, d MMM yyyy hh:mm aaa");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,15 +49,13 @@ public class FriendsDetailActivity extends ActionBarActivity implements customBu
 
         mListDates = receivedFriend.dates;
         for (int i = 0; i < mListDates.size(); i++) {
-            mListDatesString.add(mListDates.get(i).toString());
+            mListDatesString.add(dateFormat.format(mListDates.get(i)));
         }
-        Log.d(TAG, mListDatesString.toString());
 
         mListViewDates = (ListView) findViewById(R.id.listview_friends_detail);
         mDatesAdaptor = new DetailListAdapter(FriendsDetailActivity.this, mListDatesString);
         mDatesAdaptor.setCustomButtonListner(FriendsDetailActivity.this);
         mListViewDates.setAdapter(mDatesAdaptor);
-
 
     }
 
