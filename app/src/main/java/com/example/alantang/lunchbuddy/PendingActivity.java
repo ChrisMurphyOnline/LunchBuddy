@@ -32,7 +32,7 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
 
     ArrayList<ParseObject> pendingAccepts = new ArrayList<ParseObject>() ;
     ArrayList<ParseObject> rejectedAppts = new ArrayList<ParseObject>() ;
-
+    String displayDate;
 
     ParseQueries parseQueries = new ParseQueries();
 
@@ -127,14 +127,22 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
                         ParseObject posterAppointment = new ParseObject("AcceptedAppts");
                         ParseObject objectMoved = pendingAccepts.get(finalPosition);
                         //retrieve object from Pending accepts
-                        requestorAppointment.put("Appt", objectMoved.getDate("Appt"));
+                        try {
+                            requestorAppointment.put("Appt", objectMoved.getDate("Appt"));
+                        } catch (IllegalArgumentException e) {
+
+                        }
                         requestorAppointment.put("PosterName", objectMoved.get("PosterName"));
                         requestorAppointment.put("PosterId", objectMoved.get("PosterId"));
                         requestorAppointment.put("RequestorName", objectMoved.get("RequestorName"));
                         requestorAppointment.put("RequestorId", objectMoved.get("RequestorId"));
                         requestorAppointment.put("Owner", objectMoved.get("RequestorId"));
 
-                        posterAppointment.put("Appt", objectMoved.getDate("Appt"));
+                        try {
+                            posterAppointment.put("Appt", objectMoved.getDate("Appt"));
+                        } catch (IllegalArgumentException e) {
+
+                        }
                         posterAppointment.put("PosterName", objectMoved.get("PosterName"));
                         posterAppointment.put("PosterId", objectMoved.get("PosterId"));
                         posterAppointment.put("RequestorName", objectMoved.get("RequestorName"));
@@ -180,7 +188,11 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
 
                         ParseObject objectMoved = pendingAccepts.get(finalPosition);
                         //retrieve object from Pending accepts
-                        appointment.put("Appt", objectMoved.getDate("Appt"));
+                        try {
+                            appointment.put("Appt", objectMoved.getDate("Appt"));
+                        } catch (IllegalArgumentException e) {
+                        }
+
                         appointment.put("PosterName", objectMoved.get("PosterName"));
                         appointment.put("PosterId", objectMoved.get("PosterId"));
                         appointment.put("RequestorName", objectMoved.get("RequestorName"));
@@ -250,7 +262,11 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
                         for (int i = 0; i < objects.size(); i++) {
                             ParseObject object = objects.get(i);
                             if (object.getString("RequestorId").equals(ParseUser.getCurrentUser().getUsername())) {
-                                String displayDate = dateFormat.format(object.getDate("Appt"));
+                                try {
+                                    displayDate = dateFormat.format(object.getDate("Appt"));
+                                } catch (NullPointerException f) {
+                                    displayDate = "Immediate";
+                                }
                                 String request = object.getString("PosterName") + ", " + displayDate;
                                 mListRequest.add(request);
                             }
@@ -274,7 +290,11 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
                             ParseObject object = objects.get(i);
                             if (object.getString("PosterId").equals(ParseUser.getCurrentUser().getUsername())) {
                                 pendingAccepts.add(object);
-                                String displayDate = dateFormat.format(object.getDate("Appt"));
+                                try {
+                                    displayDate = dateFormat.format(object.getDate("Appt"));
+                                } catch (NullPointerException f) {
+                                    displayDate = "Immediate";
+                                }
                                 String request = object.getString("RequestorName") + ", " + displayDate;
                                 mListAccept.add(request);
                             }
@@ -298,7 +318,11 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
                             ParseObject object = objects.get(i);
                             if (object.getString("RequestorId").equals(ParseUser.getCurrentUser().getUsername())) {
                                 rejectedAppts.add(object);
-                                String displayDate = dateFormat.format(object.getDate("Appt"));
+                                try {
+                                    displayDate = dateFormat.format(object.getDate("Appt"));
+                                } catch (NullPointerException f) {
+                                    displayDate = "Immediate";
+                                }
                                 String request = object.getString("PosterName") + ", " + displayDate;
                                 mListRejected.add(request);
                             }

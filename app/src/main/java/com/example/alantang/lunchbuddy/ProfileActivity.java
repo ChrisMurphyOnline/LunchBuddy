@@ -42,6 +42,8 @@ public class ProfileActivity extends Activity implements customButtonListener, C
     ConfirmedListAdapter mAppointmentsAdapter;
     ListAdapter mAvailableAdapter;
 
+    String displayDate;
+
 //    SimpleDateFormat dateFormat = new SimpleDateFormat("E dd MMM yyyy hh:mm aa z");
     SimpleDateFormat dateFormat = new SimpleDateFormat("E, d MMM yyyy hh:mm aaa");
 
@@ -305,7 +307,11 @@ public class ProfileActivity extends Activity implements customButtonListener, C
                             if (object.getString("PosterId").equals(ParseUser.getCurrentUser().getUsername())) {
                                 if (object.getString("Owner").equals(ParseUser.getCurrentUser().getUsername())) {
                                     String companion = object.getString("RequestorName");
-                                    String displayDate = dateFormat.format(object.getDate("Appt"));
+                                    try {
+                                        displayDate = dateFormat.format(object.getDate("Appt"));
+                                    } catch (NullPointerException f) {
+                                        displayDate = "Immediate";
+                                    }
                                     acceptedAppts.add(object);
                                     mListAppointments.add(companion + ", " + displayDate);
                                 }
@@ -313,7 +319,11 @@ public class ProfileActivity extends Activity implements customButtonListener, C
                             } else if (object.getString("RequestorId").equals(ParseUser.getCurrentUser().getUsername())) {
                                 if (object.getString("Owner").equals(ParseUser.getCurrentUser().getUsername())) {
                                     String companion = object.getString("PosterName");
-                                    String displayDate = dateFormat.format(object.getDate("Appt"));
+                                    try {
+                                        displayDate = dateFormat.format(object.getDate("Appt"));
+                                    } catch (NullPointerException f) {
+                                        displayDate = "Immediate";
+                                    }
                                     acceptedAppts.add(object);
                                     mListAppointments.add(companion + ", " + displayDate);
                                 }

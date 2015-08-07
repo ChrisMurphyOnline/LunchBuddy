@@ -12,7 +12,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
@@ -79,10 +81,8 @@ public class MainActivity extends ActionBarActivity {
                     Toast.makeText(getApplicationContext(), "Error: " + err.getMessage(), Toast.LENGTH_LONG).show();
                 } else if (user.isNew()) {
                     saveFacebookId();
-                    Toast.makeText(getApplicationContext(), "User signed up and logged in through Facebook!", Toast.LENGTH_LONG).show();
                 } else {
                     saveFacebookId();
-                    Toast.makeText(getApplicationContext(), "User logged in through Facebook!", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -93,9 +93,9 @@ public class MainActivity extends ActionBarActivity {
 
         Button buttonProfile = (Button) findViewById(R.id.buttonProfile);
         Button buttonCalendar = (Button) findViewById(R.id.buttonCalendar);
-        Button buttonAvailable = (Button) findViewById(R.id.buttonAvailable);
         Button buttonFriends = (Button) findViewById(R.id.buttonFriends);
         Button buttonPending = (Button) findViewById(R.id.buttonPending);
+        ToggleButton toggle = (ToggleButton) findViewById(R.id.buttonAvailable);
 
         buttonProfile.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -112,15 +112,7 @@ public class MainActivity extends ActionBarActivity {
                 startActivity(i);
             }
         });
-//
-//        buttonAvailable.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent i = new Intent(getApplicationContext(), Available.class);
-//                startActivity(i);
-//            }
-//        });
-//
+
         buttonFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,6 +129,21 @@ public class MainActivity extends ActionBarActivity {
             }
         });
 
+        toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    ParseUser.getCurrentUser().put("Available", true);
+                    Toast.makeText(getApplicationContext(), "Status set to available!", Toast.LENGTH_LONG).show();
+                    ParseUser.getCurrentUser().saveInBackground();
+
+                } else {
+                    ParseUser.getCurrentUser().put("Available", false);
+                    Toast.makeText(getApplicationContext(), "Status set to unavailable.", Toast.LENGTH_LONG).show();
+                    ParseUser.getCurrentUser().saveInBackground();
+                }
+            }
+        });
+
         // Intent for User to be accessible from other activities
 //        Intent i = new Intent(getApplicationContext(), MainActivity.class);
 //        i.putExtra("new_variable_name","value");
@@ -145,6 +152,10 @@ public class MainActivity extends ActionBarActivity {
 
         Log.i(TAG, "onCreate");
     }
+
+
+
+
 
     // Facebook calls this feature "Single sign-on" (SSO), and requires you to override onActivityResult() in your calling Activity
     @Override
@@ -195,6 +206,7 @@ public class MainActivity extends ActionBarActivity {
                     ParseUser.getCurrentUser().put("FacebookId", userId);
                     ParseUser.getCurrentUser().put("FacebookName", facebookName);
                     ParseUser.getCurrentUser().saveInBackground();
+                    Toast.makeText(getApplicationContext(), "Logged in as " + facebookName, Toast.LENGTH_LONG).show();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }

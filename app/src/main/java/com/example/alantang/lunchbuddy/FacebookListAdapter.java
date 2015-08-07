@@ -38,17 +38,6 @@ public class FacebookListAdapter extends ArrayAdapter<FacebookFriend> {
         this.resource = resource;
     }
 
-//    public int getCount() {
-//        return friends.size();
-//    }
-//
-//    public FacebookFriend getItem(FacebookFriend position) {
-//        return position;
-//    }
-//
-//    public long getItemId(int position) {
-//        return position;
-//    }
 
     public static class ViewHolder {
         public TextView displayName;
