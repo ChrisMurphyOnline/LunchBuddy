@@ -2,7 +2,9 @@ package com.example.alantang.lunchbuddy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.LoaderManager;
 import android.content.DialogInterface;
+import android.content.Loader;
 import android.hardware.camera2.params.Face;
 import android.os.AsyncTask;
 import android.os.Parcelable;
@@ -42,7 +44,7 @@ import com.example.alantang.lunchbuddy.FacebookFriend;
 import android.content.Intent;
 
 @SuppressWarnings("serial")
-public class FriendsActivity extends Activity implements Serializable, FriendsNowListAdapter.customButtonListener {
+public class FriendsActivity extends Activity implements LoaderManager.LoaderCallbacks<Void>, Serializable, FriendsNowListAdapter.customButtonListener {
 
     private static final String TAG = "log_message";
 
@@ -54,6 +56,8 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
     ArrayList<FacebookFriend> friendsNowArray = new ArrayList<FacebookFriend>();
 
     ParseQueries parseQueries = new ParseQueries();
+
+    private static final int friendsLoader = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +76,7 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
         mListViewFacebookIds.setAdapter(facebookAdapter);
         mListViewFriendsAvailableNow.setAdapter(friendsNowAdapter);
 
-
-//        downloads list of Facebook friends
-        new DownloadFriendsList().execute();
+        getLoaderManager().initLoader(friendsLoader, null, this);
 
         mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -85,6 +87,36 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
                 startActivity(intent);
             }
         });
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        Log.d(TAG, "friends on resume");
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        Log.d(TAG, "friends on pause");
+    }
+
+    @Override
+     public void onStop(){
+        super.onStop();
+        Log.d(TAG, "friends on stop");
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.d(TAG, "friends on destroy");
+    }
+
+    @Override
+    public void onRestart(){
+        super.onRestart();
+        Log.d(TAG, "friends on restart");
     }
 
     @Override
@@ -132,7 +164,6 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -155,6 +186,31 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public Loader<Void> onCreateLoader(int id, Bundle args) {
+
+        switch (id) {
+            case friendsLoader:
+                new DownloadFriendsList().execute();
+                break;
+            default:
+                return null;
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Void> loader, Void params) {
+        getLoaderManager().destroyLoader(friendsLoader);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Void> loader) {
+        mListViewFacebookIds.setAdapter(null);
+        mListViewFriendsAvailableNow.setAdapter(null);
+    }
+
+
     private class DownloadFriendsList extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -162,8 +218,7 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
             GraphRequest.newMyFriendsRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONArrayCallback() {
                 @Override
                 public void onCompleted(JSONArray objects, GraphResponse graphResponse) {
-                    Log.d(TAG, "Graph friends: " + objects.toString());
-
+                    facebookIds.clear();
                     for (int i = 0; i < objects.length(); i++) {
                         try {
                             FacebookFriend friend = new FacebookFriend(objects.getJSONObject(i).getString("id"),
@@ -181,7 +236,6 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
         @Override
         protected void onPostExecute(Void v) {
             for (int i = 0; i < facebookIds.size(); i++) {
-                Log.d(TAG, "Id: " + facebookIds.get(i).id + ", Name: " + facebookIds.get(i).name);
                 parseQueries.retrieveUsername(facebookIds.get(i).id, facebookIds.get(i));
             }
         }
@@ -196,15 +250,8 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
             query.findInBackground(new FindCallback<ParseUser>() {
                 public void done(List<ParseUser> objects, ParseException e) {
                     if (e == null) {
-                        friendsNowArray.clear();
                         for (int i = 0; i < objects.size(); i++) {
                             if (objects.get(i).getString("FacebookId").equals(finalId)) {
-                                // check for friends available now
-                                if (objects.get(i).getBoolean("Available")) {
-                                    FacebookFriend friend = new FacebookFriend(objects.get(i).getString("FacebookId"), objects.get(i).getString("FacebookName"));
-                                    friend.username = objects.get(i).getString("username");
-                                    friendsNowArray.add(friend);
-                                }
                                 friend.setUsername(objects.get(i).getUsername());
                                 parseQueries.retrieveDatesAvailable(objects.get(i).getUsername(), friend);
                             }
@@ -226,16 +273,14 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
                         for (int i = 0; i < objects.size(); i++) {
-//                            Log.d(TAG, "Creator: " + objects.get(i).getString("Creator"));
                             if (objects.get(i).get("Creator").equals(finalUsername)) {
-                                Log.d(TAG, "Date: " + objects.get(i).getDate("Date").toString());
                                 friend.addDate(objects.get(i).getDate("Date"));
                                 friend.updateNumberOfDates();
                             }
                         }
                         ///// do code here... because somehow onPostExecute doesn't wait for ParseQueries to complete :(
                         facebookAdapter.notifyDataSetChanged();
-                        friendsNowAdapter.notifyDataSetChanged();
+                        retrieveFriendsNow();
                     } else {
                         Log.d(TAG, "Error: " + e.getMessage());
                     }
@@ -244,6 +289,33 @@ public class FriendsActivity extends Activity implements Serializable, FriendsNo
             //may have to do subsequent tasks here
 
         }
+
+        public void retrieveFriendsNow() {
+            ParseQuery query = ParseUser.getQuery();
+//            final FacebookFriend finalFriend = friend;
+            query.findInBackground(new FindCallback<ParseUser>() {
+                public void done(List<ParseUser> objects, ParseException e) {
+                    friendsNowArray.clear();
+                    if (e == null) {
+                        for (int i = 0; i < objects.size(); i++) {
+                            for (int j = 0; j < facebookIds.size(); j++) {
+                                if (objects.get(i).getUsername().equals(facebookIds.get(j).username)) {
+                                    if (objects.get(i).getBoolean("Available")) {
+                                        FacebookFriend friend = new FacebookFriend(objects.get(i).getString("FacebookId"), objects.get(i).getString("FacebookName"), objects.get(i).getUsername());
+                                        friendsNowArray.add(friend);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Something went wrong. Look at the ParseException to see what's up.
+                        Log.d(TAG, "Error: " + e.getMessage());
+                    }
+                    friendsNowAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+
 
     }
 }

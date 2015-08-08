@@ -22,6 +22,14 @@ public class FacebookFriend implements Serializable {
         this.numberOfDates = 0;
     }
 
+    public FacebookFriend(String thisId, String thisName, String thisUsername) {
+        this.id = thisId;
+        this.name = thisName;
+        this.username = thisUsername;
+        this.dates = new ArrayList<Date>();
+        this.numberOfDates = 0;
+    }
+
     public void setUsername(String thisUsername) {
         this.username = thisUsername;
     }

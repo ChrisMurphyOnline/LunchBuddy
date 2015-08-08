@@ -26,9 +26,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.AsyncTaskLoader;
+import android.content.Loader;
+import android.content.Context;
 
 
-public class ProfileActivity extends Activity implements customButtonListener, ConfirmedListAdapter.customButtonListener
+public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, customButtonListener, ConfirmedListAdapter.customButtonListener
 {
 
     //Todo: remove / change title bar
@@ -55,37 +59,33 @@ public class ProfileActivity extends Activity implements customButtonListener, C
     String value = "";
     Date date;
 
+    private static final int availableLoader = 0;
+    private static final int appointmentLoader = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
-
-
-
         setContentView(R.layout.activity_profile);
 
+//        getLoaderManager().initLoader(appointmentLoader, null, this);
+
         // download list of appointments
-
-        parseQueries.retrieveDatesAvailable();
         parseQueries.retrieveAcceptedAppts();
-
-
 //        mAppointmentsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
 //        mAvailableAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
 
         mListViewAppointments = (ListView)findViewById(R.id.listview_current_appointments);
         mListViewAvailable = (ListView)findViewById(R.id.listview_dates_available);
 
-
         mAppointmentsAdapter = new ConfirmedListAdapter(ProfileActivity.this, mListAppointments);
         mAppointmentsAdapter.setCustomButtonListner(ProfileActivity.this);
         mAvailableAdapter = new ListAdapter(ProfileActivity.this, mListDatesAvailable);
         mAvailableAdapter.setCustomButtonListner(ProfileActivity.this);
 
-        mListViewAvailable.setAdapter(mAvailableAdapter);
         mListViewAppointments.setAdapter(mAppointmentsAdapter);
+        mListViewAvailable.setAdapter(mAvailableAdapter);
 
+        getLoaderManager().initLoader(availableLoader, null, this);
 
     }
 
@@ -134,6 +134,31 @@ public class ProfileActivity extends Activity implements customButtonListener, C
         AlertDialog clearBox = clearOption(position);
         clearBox.show();
     }
+
+    @Override
+    public Loader<Void> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG, "in create loader");
+        switch (id) {
+            case availableLoader:
+                parseQueries.retrieveDatesAvailable();
+                break;
+            default:
+                return null;
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Void> loader, Void params) {
+        getLoaderManager().destroyLoader(availableLoader);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Void> loader) {
+        mListViewAvailable.setAdapter(null);
+    }
+
 
 
     public Date convertStringToDate (String date) {
@@ -273,6 +298,7 @@ public class ProfileActivity extends Activity implements customButtonListener, C
             query.findInBackground(new FindCallback<ParseObject>() {
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
+                        mListDatesAvailable.clear();
                         for (int i = 0; i < objects.size(); i++) {
                             ParseObject object = objects.get(i);
                              if (object.getACL().getWriteAccess(ParseUser.getCurrentUser())) {
@@ -282,9 +308,9 @@ public class ProfileActivity extends Activity implements customButtonListener, C
                                  Log.d(TAG, "Formatted day: " + formattedDate);
                                  mListDatesAvailable.add(formattedDate);
                                  Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
-                                 mAvailableAdapter.notifyDataSetChanged();
                              }
                         }
+                        mAvailableAdapter.notifyDataSetChanged();
                         Log.d(TAG, "Retrieved " + objects.size() + " appointments");
 
                     } else {
@@ -371,7 +397,4 @@ public class ProfileActivity extends Activity implements customButtonListener, C
 
 
     }
-
-
-
 }
