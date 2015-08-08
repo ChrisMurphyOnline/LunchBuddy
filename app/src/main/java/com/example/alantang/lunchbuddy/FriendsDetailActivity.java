@@ -2,9 +2,12 @@ package com.example.alantang.lunchbuddy;
 
 import android.app.AlertDialog;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -48,7 +51,13 @@ public class FriendsDetailActivity extends Activity implements LoaderManager.Loa
         mDatesAdaptor.setCustomButtonListner(FriendsDetailActivity.this);
         mListViewDates.setAdapter(mDatesAdaptor);
 
-        getLoaderManager().initLoader(friendsDetailLoader, null, this);
+        if (isNetworkConnected()) {
+            getLoaderManager().initLoader(friendsDetailLoader, null, this);
+        } else {
+            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+        }
+
+
 
     }
 
@@ -185,5 +194,11 @@ public class FriendsDetailActivity extends Activity implements LoaderManager.Loa
                 })
                 .create();
         return myQuittingDialogBox;
+    }
+
+    public boolean isNetworkConnected() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
     }
 }

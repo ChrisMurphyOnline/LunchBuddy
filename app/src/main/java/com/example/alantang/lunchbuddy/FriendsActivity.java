@@ -3,9 +3,12 @@ package com.example.alantang.lunchbuddy;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Loader;
 import android.hardware.camera2.params.Face;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Parcelable;
 import android.support.v7.app.ActionBarActivity;
@@ -76,7 +79,13 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
         mListViewFacebookIds.setAdapter(facebookAdapter);
         mListViewFriendsAvailableNow.setAdapter(friendsNowAdapter);
 
-        getLoaderManager().initLoader(friendsLoader, null, this);
+
+        if (isNetworkConnected()) {
+            getLoaderManager().initLoader(friendsLoader, null, this);
+        } else {
+            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+        }
+
 
         mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -315,7 +324,12 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
                 }
             });
         }
-
-
     }
+
+    public boolean isNetworkConnected() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
+    }
+
 }

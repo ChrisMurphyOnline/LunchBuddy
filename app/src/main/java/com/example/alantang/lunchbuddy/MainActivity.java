@@ -34,9 +34,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
+import android.app.Activity;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     private static final String TAG = "log_message";
 
@@ -78,7 +79,6 @@ public class MainActivity extends ActionBarActivity {
             public void done(ParseUser user, ParseException err) {
                 if (user == null) {
                     Log.d(TAG, "Uh oh. The user cancelled the Facebook login.");
-                    Toast.makeText(getApplicationContext(), "Error: " + err.getMessage(), Toast.LENGTH_LONG).show();
                 } else if (user.isNew()) {
                     saveFacebookId();
                 } else {

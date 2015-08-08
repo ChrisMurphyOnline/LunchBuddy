@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.ActionBarActivity;
@@ -67,10 +69,9 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-//        getLoaderManager().initLoader(appointmentLoader, null, this);
 
         // download list of appointments
-        parseQueries.retrieveAcceptedAppts();
+
 //        mAppointmentsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
 //        mAvailableAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
 
@@ -84,8 +85,13 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
 
         mListViewAppointments.setAdapter(mAppointmentsAdapter);
         mListViewAvailable.setAdapter(mAvailableAdapter);
+        if (isNetworkConnected()) {
+            getLoaderManager().initLoader(availableLoader, null, this);
+            getLoaderManager().initLoader(appointmentLoader, null, this);
+        } else {
+            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+        }
 
-        getLoaderManager().initLoader(availableLoader, null, this);
 
     }
 
@@ -142,6 +148,9 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
             case availableLoader:
                 parseQueries.retrieveDatesAvailable();
                 break;
+            case appointmentLoader:
+                parseQueries.retrieveAcceptedAppts();
+                break;
             default:
                 return null;
         }
@@ -151,15 +160,15 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
     @Override
     public void onLoadFinished(Loader<Void> loader, Void params) {
         getLoaderManager().destroyLoader(availableLoader);
+        getLoaderManager().destroyLoader(appointmentLoader);
 
     }
 
     @Override
     public void onLoaderReset(Loader<Void> loader) {
         mListViewAvailable.setAdapter(null);
+        mListViewAppointments.setAdapter(null);
     }
-
-
 
     public Date convertStringToDate (String date) {
         Date result = new Date();
@@ -394,7 +403,12 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
 
             return null;
         }
-
-
     }
+
+    public boolean isNetworkConnected() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
+    }
+
 }

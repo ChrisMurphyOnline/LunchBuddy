@@ -4,6 +4,9 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -94,7 +97,6 @@ public class CalendarActivity extends Activity
         buttonSubmit.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-
                 if (dateSelected != null) {
                     if (fromProfile) {
 
@@ -114,24 +116,27 @@ public class CalendarActivity extends Activity
                                 }
                             }
                         });
-
                     } else {
                         if (dateSelected != null) {
-                            ParseObject appointment = new ParseObject("DatesAvailable");
-                            ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
-                            postACL.setPublicReadAccess(true);
-                            postACL.setPublicWriteAccess(false);
-                            appointment.setACL(postACL);
-                            appointment.put("Date", dateSelected);
-                            appointment.put("Creator", ParseUser.getCurrentUser().getUsername());
+                            if (isNetworkConnected()) {
+                                ParseObject appointment = new ParseObject("DatesAvailable");
+                                ParseACL postACL = new ParseACL(ParseUser.getCurrentUser());
+                                postACL.setPublicReadAccess(true);
+                                postACL.setPublicWriteAccess(false);
+                                appointment.setACL(postACL);
+                                appointment.put("Date", dateSelected);
+                                appointment.put("Creator", ParseUser.getCurrentUser().getUsername());
 
 
-                            Log.i(TAG, ParseUser.getCurrentUser().getUsername());
-                            Log.i(TAG, "Date: " + dateSelected);
-                            Toast.makeText(getApplicationContext(), "Uploading date, please wait...", Toast.LENGTH_LONG).show();
-                            appointment.saveInBackground();
-                            Toast.makeText(getApplicationContext(), "Uploaded!", Toast.LENGTH_LONG).show();
-                            Log.i(TAG, "Uploaded to Parse!");
+                                Log.i(TAG, ParseUser.getCurrentUser().getUsername());
+                                Log.i(TAG, "Date: " + dateSelected);
+                                Toast.makeText(getApplicationContext(), "Uploading date, please wait...", Toast.LENGTH_LONG).show();
+                                appointment.saveInBackground();
+                                Toast.makeText(getApplicationContext(), "Uploaded!", Toast.LENGTH_LONG).show();
+                                Log.i(TAG, "Uploaded to Parse!");
+                            } else {
+                                Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+                            }
                         }
                         else {
                             Log.i(TAG, "Date and time not inputted.");
@@ -238,5 +243,13 @@ public class CalendarActivity extends Activity
         }
         return null;
     }
+
+
+    public boolean isNetworkConnected() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
+    }
+
 
 }

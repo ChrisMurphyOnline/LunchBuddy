@@ -2,7 +2,12 @@ package com.example.alantang.lunchbuddy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.LoaderManager;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Loader;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,7 +30,7 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 
-public class PendingActivity extends Activity implements PendingListAdapter.customButtonListener, RejectedListAdapter.customButtonListener
+public class PendingActivity extends Activity implements LoaderManager.LoaderCallbacks<Void>, PendingListAdapter.customButtonListener, RejectedListAdapter.customButtonListener
 {
 
     private static final String TAG = "log_message";
@@ -48,14 +53,15 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
     SimpleDateFormat dateFormat = new SimpleDateFormat("E, d MMM yyyy hh:mm aaa");
 
 
+
+    private static final int requestsLoader = 0;
+    private static final int rejectedLoader = 1;
+    private static final int acceptsLoader = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pending);
-
-        parseQueries.retrievePendingRequests();
-        parseQueries.retrievePendingAccepts();
-        parseQueries.retrieveRejectedRequests();
 
         mListViewRequest = (ListView) findViewById(R.id.listview_pending_requests);
         mListViewAccept = (ListView) findViewById(R.id.listview_pending_accepts);
@@ -70,6 +76,17 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
         mListViewRequest.setAdapter(mRequestAdapter);
         mListViewAccept.setAdapter(mAcceptAdapter);
         mListViewRejected.setAdapter(mRejectedAdapter);
+
+
+
+        if (isNetworkConnected()) {
+            getLoaderManager().initLoader(requestsLoader, null, this);
+            getLoaderManager().initLoader(rejectedLoader, null, this);
+            getLoaderManager().initLoader(acceptsLoader, null, this);
+        } else {
+            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+        }
+
 
     }
 
@@ -94,6 +111,41 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public Loader<Void> onCreateLoader(int id, Bundle args) {
+        Log.d(TAG, "in create loader");
+        switch (id) {
+            case requestsLoader:
+                parseQueries.retrievePendingRequests();
+                break;
+            case rejectedLoader:
+                parseQueries.retrieveRejectedRequests();
+                break;
+            case acceptsLoader:
+                parseQueries.retrievePendingAccepts();
+                break;
+            default:
+                return null;
+        }
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Void> loader, Void params) {
+        getLoaderManager().destroyLoader(requestsLoader);
+        getLoaderManager().destroyLoader(rejectedLoader);
+        getLoaderManager().destroyLoader(acceptsLoader);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Void> loader) {
+        mListViewRequest.setAdapter(null);
+        mListViewRejected.setAdapter(null);
+        mListViewAccept.setAdapter(null);
+    }
+
 
     @Override
     public void onAcceptClickListener(int position, String value) {
@@ -337,6 +389,12 @@ public class PendingActivity extends Activity implements PendingListAdapter.cust
         }
 
 
+    }
+
+    public boolean isNetworkConnected() {
+        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
     }
 
 

@@ -31,7 +31,7 @@
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:layout_marginTop="10dip"
-            android:background="#B29090"
+            android:background="#99CCFF"
             android:layout_weight="1"
             android:dividerHeight="0dp">
 
@@ -67,7 +67,7 @@
             android:layout_height="0dp"
             android:clipToPadding="false"
             android:layout_marginTop="10dip"
-            android:background="#B29090"
+            android:background="#FFB2B2"
             android:layout_weight="1">
         </ListView>
 
