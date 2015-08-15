@@ -73,6 +73,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.alantang.lunchbuddy.MainActivity" />
         </activity>
+
+        <provider
+            android:authorities="com.example.alantang.lunchbuddy.DatesAvailListProvider"
+            android:multiprocess="true"
+            android:name="com.example.alantang.lunchbuddy.DatesAvailListProvider" />
+
     </application>
 
 </manifest>

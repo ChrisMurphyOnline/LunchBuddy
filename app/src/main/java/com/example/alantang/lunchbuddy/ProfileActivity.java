@@ -2,16 +2,21 @@ package com.example.alantang.lunchbuddy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -69,6 +74,28 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
+        SQLiteDatabase db = new DatesAvailDatabase(this).getWritableDatabase();
+
+        ContentValues testValues = new ContentValues();
+        testValues.put(DatesAvailDatabase.COL_USER, "test user");
+        testValues.put(DatesAvailDatabase.COL_DATE, "test date");
+        testValues.put(DatesAvailDatabase.COL_UPDATED, "test updated");
+
+        db.insert(DatesAvailDatabase.TABLE_DATES_AVAIL, null, testValues);
+
+        Cursor cursor = db.query(
+                DatesAvailDatabase.TABLE_DATES_AVAIL,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+
+        if (cursor.moveToFirst()) {
+            Log.d(TAG, DatabaseUtils.dumpCursorToString(cursor));
+        }
 
         // download list of appointments
 
@@ -410,5 +437,7 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
     }
+
+
 
 }

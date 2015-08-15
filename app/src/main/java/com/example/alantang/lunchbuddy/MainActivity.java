@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
 
         Parse.initialize(this, "cRs6iJZlt7MHBAqP8ch1SKLREZ6yADDtgl66Cf82", "NVjTb0Y3aMVWHrpEUCjxiIWQPEuj1aOIjBCmkD8Z");
 
-        ParseFacebookUtils.initialize(getApplicationContext());
+        ParseFacebookUtils.initialize(this);
 
         final List<String> permissions = Arrays.asList("public_profile", "email");
 

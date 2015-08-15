@@ -65,6 +65,7 @@ public class CalendarActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
 
+
         // check if information is received from Profile Edit
         receiveIntent();
 
