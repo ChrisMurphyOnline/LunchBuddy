@@ -44,15 +44,11 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-// Initialize the SDK before executing any other operations,
-        // especially, if you're using Facebook UI elements.
-        FacebookSdk.sdkInitialize(getApplicationContext());
+
         // Enable Local Datastore.
-        Parse.enableLocalDatastore(this);
 
-        Parse.initialize(this, "cRs6iJZlt7MHBAqP8ch1SKLREZ6yADDtgl66Cf82", "NVjTb0Y3aMVWHrpEUCjxiIWQPEuj1aOIjBCmkD8Z");
 
-        ParseFacebookUtils.initialize(this);
+
 
         final List<String> permissions = Arrays.asList("public_profile", "email");
 

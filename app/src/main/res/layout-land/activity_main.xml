@@ -1,0 +1,72 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+android:paddingRight="@dimen/activity_horizontal_margin"
+android:paddingTop="@dimen/activity_vertical_margin"
+android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Dates and Appointments"
+    android:id="@+id/buttonProfile"
+    android:layout_marginTop="36dp"
+    android:layout_below="@+id/textView"
+    android:layout_toLeftOf="@+id/buttonAvailable"
+    android:layout_toStartOf="@+id/buttonAvailable" />
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Set New Date"
+    android:id="@+id/buttonCalendar"
+    android:layout_above="@+id/buttonAvailable"
+    android:layout_alignLeft="@+id/buttonProfile"
+    android:layout_alignStart="@+id/buttonProfile"
+    android:layout_marginBottom="33dp"
+    android:layout_alignRight="@+id/buttonProfile"
+    android:layout_alignEnd="@+id/buttonProfile" />
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Friends Available"
+    android:id="@+id/buttonFriends"
+    android:layout_alignTop="@+id/buttonCalendar"
+    android:layout_toRightOf="@+id/buttonAvailable"
+    android:layout_alignRight="@+id/buttonPending"
+    android:layout_alignEnd="@+id/buttonPending" />
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Pending Appointments"
+    android:id="@+id/buttonPending"
+    android:layout_alignTop="@+id/buttonProfile"
+    android:layout_toRightOf="@+id/buttonAvailable"
+    android:layout_toEndOf="@+id/buttonAvailable" />
+
+
+    <ToggleButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="Not available."
+        android:textOn="I'm available!"
+        android:id="@+id/buttonAvailable"
+        android:checked="true"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Welcome to LunchBuddy!"
+        android:textSize="20dp"
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="41dp" />
+
+
+</RelativeLayout>
