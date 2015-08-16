@@ -3,6 +3,7 @@ package com.example.alantang.lunchbuddy;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -18,11 +19,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CursorAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
-import com.example.alantang.lunchbuddy.ListAdapter.customButtonListener;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -39,7 +43,7 @@ import android.content.Loader;
 import android.content.Context;
 
 
-public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, customButtonListener, ConfirmedListAdapter.customButtonListener
+public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>, ConfirmedListAdapter.customButtonListener
 {
 
     //Todo: remove / change title bar
@@ -52,73 +56,61 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
     ArrayList mListDatesAvailable = new ArrayList<String>();
     ConfirmedListAdapter mAppointmentsAdapter;
     ListAdapter mAvailableAdapter;
+    DatesAvailCursorAdapter datesAvailAdapter;
+//    DatesAvailCursorAdapter datesAvailSimpleCursorAdapter;
+    Cursor datesAvailCursor;
 
     String displayDate;
 
-//    SimpleDateFormat dateFormat = new SimpleDateFormat("E dd MMM yyyy hh:mm aa z");
     SimpleDateFormat dateFormat = new SimpleDateFormat("E, d MMM yyyy hh:mm aaa");
 
     String formattedDate;
 
     ParseQueries parseQueries = new ParseQueries();
-//    public static String objectId = "";
-    boolean deleteDialogue = false;
     String value = "";
     Date date;
 
     private static final int availableLoader = 0;
     private static final int appointmentLoader = 1;
 
+    SQLiteDatabase datesAvailDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        SQLiteDatabase db = new DatesAvailDatabase(this).getWritableDatabase();
+        DatesAvailDatabase handler = new DatesAvailDatabase(this);
+        datesAvailDb = handler.getWritableDatabase();
 
-        ContentValues testValues = new ContentValues();
-        testValues.put(DatesAvailDatabase.COL_USER, "test user");
-        testValues.put(DatesAvailDatabase.COL_DATE, "test date");
-        testValues.put(DatesAvailDatabase.COL_UPDATED, "test updated");
-
-        db.insert(DatesAvailDatabase.TABLE_DATES_AVAIL, null, testValues);
-
-        Cursor cursor = db.query(
-                DatesAvailDatabase.TABLE_DATES_AVAIL,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-
-        if (cursor.moveToFirst()) {
-            Log.d(TAG, DatabaseUtils.dumpCursorToString(cursor));
-        }
 
         // download list of appointments
 
-//        mAppointmentsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListAppointments);
-//        mAvailableAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mListDatesAvailable);
-
         mListViewAppointments = (ListView)findViewById(R.id.listview_current_appointments);
-        mListViewAvailable = (ListView)findViewById(R.id.listview_dates_available);
 
         mAppointmentsAdapter = new ConfirmedListAdapter(ProfileActivity.this, mListAppointments);
         mAppointmentsAdapter.setCustomButtonListner(ProfileActivity.this);
-        mAvailableAdapter = new ListAdapter(ProfileActivity.this, mListDatesAvailable);
-        mAvailableAdapter.setCustomButtonListner(ProfileActivity.this);
+
 
         mListViewAppointments.setAdapter(mAppointmentsAdapter);
-        mListViewAvailable.setAdapter(mAvailableAdapter);
+
+        Button buttonRefresh = (Button) findViewById(R.id.profileRefreshButton);
+
+        buttonRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                startActivity(getIntent());
+            }
+        });
+
         if (isNetworkConnected()) {
-            getLoaderManager().initLoader(availableLoader, null, this);
-            getLoaderManager().initLoader(appointmentLoader, null, this);
+            parseQueries.retrieveAcceptedAppts();
+            parseQueries.retrieveDatesAvailable();
+
         } else {
             Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
         }
-
 
     }
 
@@ -145,22 +137,7 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onEditClickListener(int position, String value) {
-        Date date = convertStringToDate(value);
-        setDate(date);
-        AlertDialog editBox = editOption();
-        editBox.show();
 
-    }
-
-    @Override
-    public void onDeleteClickListener(int position, String value) {
-        resetValue();
-        setValue(value);
-        AlertDialog deleteBox = deleteOption();
-        deleteBox.show();
-    }
 
     @Override
     public void onClearClickListener(int position, String value) {
@@ -169,44 +146,30 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
     }
 
     @Override
-    public Loader<Void> onCreateLoader(int id, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.d(TAG, "in create loader");
-        switch (id) {
-            case availableLoader:
-                parseQueries.retrieveDatesAvailable();
-                break;
-            case appointmentLoader:
-                parseQueries.retrieveAcceptedAppts();
-                break;
-            default:
-                return null;
-        }
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Void> loader, Void params) {
-        getLoaderManager().destroyLoader(availableLoader);
-        getLoaderManager().destroyLoader(appointmentLoader);
+        String[] projection = {
+                DatesAvailDatabase.ID, DatesAvailDatabase.COL_DATE };
+        CursorLoader cursorLoader = new CursorLoader(this,
+                DatesAvailListProvider.CONTENT_URI, projection, null, null, null);
+        return cursorLoader;
 
     }
 
     @Override
-    public void onLoaderReset(Loader<Void> loader) {
-        mListViewAvailable.setAdapter(null);
-        mListViewAppointments.setAdapter(null);
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG, "On Load Finished Rows: " + String.valueOf(data.getCount()));
+        Log.d(TAG, "On Load Finished Contents: " + DatabaseUtils.dumpCursorToString(data));
+
+        datesAvailAdapter.swapCursor(data);
+        datesAvailAdapter.notifyDataSetChanged();
     }
 
-    public Date convertStringToDate (String date) {
-        Date result = new Date();
-        try {
-            result = dateFormat.parse(date);
-
-        } catch (java.text.ParseException e) {
-            e.printStackTrace();
-        }
-        return result;
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        datesAvailAdapter.swapCursor(null);
     }
+
 
     public void setValue(String val) {
         value = val;
@@ -219,11 +182,7 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
     public void setDate(Date val) {
         date = val;
     }
-    private void deleteObject(String value) {
-        Date date = convertStringToDate(value);
-        parseQueries.deleteObject(date);
 
-    }
 
 
     // opens up Calendar dialogue to edit date
@@ -255,50 +214,8 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         });
     }
 
-    private AlertDialog deleteOption()
-    {
-        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
-                //set message, title, and icon
-                .setTitle("Delete")
-                .setMessage("Are you sure you want to delete?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        String val = ProfileActivity.this.value;
-                        ProfileActivity.this.deleteObject(val);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .create();
-        return myQuittingDialogBox;
-    }
 
-    private AlertDialog editOption()
-    {
-        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
-                //set message, title, and icon
-                .setTitle("Edit")
-                .setMessage("Would you like to edit the item?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
-                        Date date  = ProfileActivity.this.date;
-                        Log.i(TAG, "Date in editDialogue: " + date.toString());
-                        ProfileActivity.this.editObject(date);
-                        dialog.dismiss();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .create();
-        return myQuittingDialogBox;
-    }
+
 
     private AlertDialog clearOption(int position)
     {
@@ -334,7 +251,9 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
             query.findInBackground(new FindCallback<ParseObject>() {
                 public void done(List<ParseObject> objects, ParseException e) {
                     if (e == null) {
-                        mListDatesAvailable.clear();
+//                        mListDatesAvailable.clear();
+                        //clear database contents
+                        datesAvailDb.delete("dates", null, null);
                         for (int i = 0; i < objects.size(); i++) {
                             ParseObject object = objects.get(i);
                              if (object.getACL().getWriteAccess(ParseUser.getCurrentUser())) {
@@ -342,12 +261,25 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
                                  Log.d(TAG, "Original format: " + date.toString());
                                  formattedDate = dateFormat.format(date);
                                  Log.d(TAG, "Formatted day: " + formattedDate);
-                                 mListDatesAvailable.add(formattedDate);
-                                 Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
+
+                                 ContentValues values = new ContentValues();
+                                 values.put(DatesAvailDatabase.COL_USER, object.getString("Creator"));
+                                 values.put(DatesAvailDatabase.COL_DATE, formattedDate);
+                                 values.put(DatesAvailDatabase.COL_UPDATED, dateFormat.format(object.getUpdatedAt()));
+                                 datesAvailDb.insert(DatesAvailDatabase.TABLE_DATES_AVAIL, null, values);
+
+//                                 mListDatesAvailable.add(formattedDate);
+//                                 Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
                              }
                         }
-                        mAvailableAdapter.notifyDataSetChanged();
-                        Log.d(TAG, "Retrieved " + objects.size() + " appointments");
+                        datesAvailCursor = datesAvailDb.rawQuery("SELECT * FROM dates", null);
+
+                        Log.d(TAG, "Rows: " + String.valueOf(datesAvailCursor.getCount()));
+                        Log.d(TAG, "Contents: " + DatabaseUtils.dumpCursorToString(datesAvailCursor));
+//
+
+                        displayListView();
+
 
                     } else {
                         Toast.makeText(getApplicationContext(), "Error", Toast.LENGTH_LONG).show();
@@ -401,35 +333,33 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         }
 
 
-        public ParseQuery<ParseObject> deleteObject (Date date) {
-            Log.d(TAG, "in deleteObject");
-            Log.d(TAG, date.toString());
-            ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
-            query.whereEqualTo("Date", date);
-            query.findInBackground(new FindCallback<ParseObject>() {
-                public void done(List<ParseObject> objects, ParseException e) {
-                    if (e == null) {
-                        Log.d(TAG, "Retrieved " + objects.size() + " objects");
-                        if (objects.size() > 0) {
-                            objects.get(0).deleteInBackground();
-                            Toast.makeText(ProfileActivity.this, "Item deleted!", Toast.LENGTH_SHORT).show();
-                            mListDatesAvailable.clear();
-                            mAvailableAdapter.clear();
-                            parseQueries.retrieveDatesAvailable();
-                        } else {
-                            Log.d(TAG, "No object found!");
-                        }
-
-
-                    } else {
-                        Toast.makeText(ProfileActivity.this, "Oops! Item does not exist. Please refresh the page.", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "Error: " + e.getMessage());
-                    }
-                }
-            });
-
-            return null;
-        }
+//        public void deleteObject (Date date) {
+//            Log.d(TAG, "in deleteObject");
+//            Log.d(TAG, date.toString());
+//            ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
+//            query.whereEqualTo("Date", date);
+//            query.findInBackground(new FindCallback<ParseObject>() {
+//                public void done(List<ParseObject> objects, ParseException e) {
+//                    if (e == null) {
+//                        Log.d(TAG, "Retrieved " + objects.size() + " objects");
+//                        if (objects.size() > 0) {
+//                            objects.get(0).deleteInBackground();
+//                            Toast.makeText(ProfileActivity.this, "Item deleted!", Toast.LENGTH_SHORT).show();
+//                            mListDatesAvailable.clear();
+//                            mAvailableAdapter.clear();
+//                            parseQueries.retrieveDatesAvailable();
+//                        } else {
+//                            Log.d(TAG, "No object found!");
+//                        }
+//
+//
+//                    } else {
+//                        Toast.makeText(ProfileActivity.this, "Oops! Item does not exist. Please refresh the page.", Toast.LENGTH_SHORT).show();
+//                        Log.d(TAG, "Error: " + e.getMessage());
+//                    }
+//                }
+//            });
+//        }
     }
 
     public boolean isNetworkConnected() {
@@ -438,6 +368,34 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Void>, 
         return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
     }
 
+
+    private void displayListView() {
+
+
+        // The desired columns to be bound
+        String[] columns = new String[] {
+                DatesAvailDatabase.COL_DATE,
+        };
+
+        // the XML defined views which the data will be bound to
+        int[] to = new int[] {
+                R.id.childTextView,
+        };
+
+        // create an adapter from the SimpleCursorAdapter
+        datesAvailAdapter = new DatesAvailCursorAdapter(
+                this,
+                null,
+                0);
+        // get reference to the ListView
+        mListViewAvailable = (ListView)findViewById(R.id.listview_dates_available); //moved to botton
+
+        // Assign adapter to ListView
+        mListViewAvailable.setAdapter(datesAvailAdapter);
+        //Ensures a loader is initialized and active.
+        getLoaderManager().initLoader(availableLoader, null, this);
+
+    }
 
 
 }

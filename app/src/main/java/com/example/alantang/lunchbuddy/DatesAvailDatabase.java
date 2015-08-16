@@ -13,7 +13,6 @@ public class DatesAvailDatabase extends SQLiteOpenHelper {
 
     private static final String TAG = "log_message";
     private static final int DB_VERSION = 1;
-//    private static final String DB_NAME = "dates_available";
 
     //database schema
 
@@ -41,8 +40,6 @@ public class DatesAvailDatabase extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(DB_SCHEMA);
-//        seedData(db);
-//        Log.d(TAG, "Database seeded!");
     }
 
     @Override
@@ -59,16 +56,16 @@ public class DatesAvailDatabase extends SQLiteOpenHelper {
      * @param db
      *            The open database
      */
-    private void seedData(SQLiteDatabase db) {
-        ContentValues testValues = new ContentValues();
-        testValues.put(COL_USER, "test user");
-        testValues.put(COL_DATE, "test date");
-        testValues.put(COL_UPDATED, "test updated");
-
-        db.insert(TABLE_DATES_AVAIL, null, testValues);
-//        db.execSQL("insert into tutorials (user, date, updated) values ('Hello', 'Test1', 'End of Test');");
-//        db.execSQL("insert into tutorials (user, date, updated) values ('Hello', 'Test2', 'End of Test');");
-    }
+//    private void seedData(SQLiteDatabase db) {
+//        ContentValues testValues = new ContentValues();
+//        testValues.put(COL_USER, "test user 1");
+//        testValues.put(COL_DATE, "test date 1");
+//        testValues.put(COL_UPDATED, "test updated 1");
+//
+//        db.insert(TABLE_DATES_AVAIL, null, testValues);
+////        db.execSQL("insert into tutorials (user, date, updated) values ('Hello', 'Test1', 'End of Test');");
+////        db.execSQL("insert into tutorials (user, date, updated) values ('Hello', 'Test2', 'End of Test');");
+//    }
 
 
 

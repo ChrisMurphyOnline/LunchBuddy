@@ -29,9 +29,9 @@ public class DatesAvailListProvider extends ContentProvider {
             + "/" + DATES_BASE_PATH);
 
     public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
-            + "/mt-date";
+            + "/date";
     public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
-            + "/mt-date";
+            + "/dates";
 
 
     @Override
@@ -50,6 +50,7 @@ public class DatesAvailListProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
+
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(DatesAvailDatabase.TABLE_DATES_AVAIL);
 

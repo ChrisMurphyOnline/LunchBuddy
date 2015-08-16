@@ -75,7 +75,7 @@
         </activity>
 
         <provider
-            android:authorities="com.example.alantang.lunchbuddy.DatesAvailListProvider"
+            android:authorities="com.example.alantang.lunchbuddy"
             android:multiprocess="true"
             android:name="com.example.alantang.lunchbuddy.DatesAvailListProvider" />
 
