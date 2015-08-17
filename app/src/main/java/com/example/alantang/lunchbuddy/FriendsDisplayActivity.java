@@ -1,39 +1,39 @@
 package com.example.alantang.lunchbuddy;
 
-import android.content.Intent;
+import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.io.Serializable;
 
+public class FriendsDisplayActivity extends FragmentActivity {
 
-public class FriendsDetailActivity extends FragmentActivity {
+    private boolean mTwoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_friends_detail);
+        setContentView(R.layout.activity_friends_holder);
 
-//        Intent intent = getIntent();
-//        FacebookFriend receivedFriend = (FacebookFriend) intent.getSerializableExtra("datesDetail");
-
+    if (findViewById(R.id.friends_detail_container) != null) {
+        // The detail container view will be present only in the large-screen layouts
+        // (res/layout-sw600dp). If this view is present, then the activity should be
+        // in two-pane mode.
+        mTwoPane = true;
+        // In two-pane mode, show the detail view in this activity by
+        // adding or replacing the detail fragment using a
+        // fragment transaction.
         if (savedInstanceState == null) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("datesDetail", getIntent().getSerializableExtra("datesDetail"));
-
-            FriendsDetailFragment friendsDetailFragment = new FriendsDetailFragment();
-            friendsDetailFragment.setArguments(bundle);
-
             getFragmentManager().beginTransaction()
-                    .add(R.id.friends_detail_container, friendsDetailFragment)
+                    .replace(R.id.friends_detail_container, new FriendsDetailFragment())
                     .commit();
-
         }
+    }
 
-
-        //set Fragmentclass Arguments
+    getFragmentManager().findFragmentById(R.id.friendsDisplayFragment);
 
 
     }
@@ -41,7 +41,7 @@ public class FriendsDetailActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_friends_detail, menu);
+        getMenuInflater().inflate(R.menu.menu_friends_holder, menu);
         return true;
     }
 

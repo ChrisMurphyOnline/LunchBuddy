@@ -1,19 +1,12 @@
 package com.example.alantang.lunchbuddy;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.hardware.camera2.params.Face;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.TextView;
-import com.example.alantang.lunchbuddy.FriendsActivity;
-import com.example.alantang.lunchbuddy.FacebookFriend;
 
 import java.util.ArrayList;
 

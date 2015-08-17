@@ -13,4 +13,5 @@
     <string name="title_activity_friends">FriendsActivity</string>
     <string name="title_activity_friends_detail">FriendsDetailActivity</string>
     <string name="title_activity_pending">PendingActivity</string>
+    <string name="title_activity_friends_holder">FriendsHolderActivity</string>
 </resources>

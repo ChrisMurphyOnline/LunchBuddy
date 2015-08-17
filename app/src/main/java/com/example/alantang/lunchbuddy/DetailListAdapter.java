@@ -30,7 +30,7 @@ public class DetailListAdapter extends ArrayAdapter<String> {
     private ArrayList<String> data = new ArrayList<String>();
 
     public DetailListAdapter(Context context, ArrayList<String> dataItem) {
-        super(context, R.layout.activity_friends_detail, dataItem);
+        super(context, R.layout.fragment_friends_detail, dataItem);
         this.data = dataItem;
         this.context = context;
     }

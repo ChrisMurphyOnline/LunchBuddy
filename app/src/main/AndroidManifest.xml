@@ -6,11 +6,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name="com.example.alantang.lunchbuddy.Application"
+        android:name=".Application"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+         >
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -27,6 +28,7 @@
         <activity
             android:name=".ProfileActivity"
             android:label="@string/title_activity_profile"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -50,9 +52,26 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
+
         <activity
-            android:name=".FriendsActivity"
-            android:label="@string/title_activity_friends"
+            android:name=".PendingActivity"
+            android:label="@string/title_activity_pending"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.alantang.lunchbuddy.MainActivity" />
+        </activity>
+
+        <provider
+            android:name=".DatesAvailListProvider"
+            android:authorities="com.example.alantang.lunchbuddy"
+            android:multiprocess="true" />
+
+        <activity
+            android:name=".FriendsDisplayActivity"
+            android:label="FriendsDisplayActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -61,25 +80,13 @@
         <activity
             android:name=".FriendsDetailActivity"
             android:label="@string/title_activity_friends_detail"
-            android:parentActivityName=".FriendsActivity" >
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:parentActivityName=".FriendsDisplayActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.alantang.lunchbuddy.FriendsActivity" />
+                android:value="com.example.alantang.lunchbuddy.FriendsDisplayActivity" />
         </activity>
-        <activity
-            android:name=".PendingActivity"
-            android:label="@string/title_activity_pending"
-            android:parentActivityName=".MainActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.alantang.lunchbuddy.MainActivity" />
-        </activity>
-
-        <provider
-            android:authorities="com.example.alantang.lunchbuddy"
-            android:multiprocess="true"
-            android:name="com.example.alantang.lunchbuddy.DatesAvailListProvider" />
-
     </application>
+
 
 </manifest>

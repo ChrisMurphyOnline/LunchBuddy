@@ -1,30 +1,31 @@
 package com.example.alantang.lunchbuddy;
 
-import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Loader;
-import android.hardware.camera2.params.Face;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Parcelable;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
 import com.parse.FindCallback;
 import com.parse.ParseACL;
 import com.parse.ParseException;
@@ -34,20 +35,15 @@ import com.parse.ParseUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import com.example.alantang.lunchbuddy.FacebookListAdapter;
-import com.example.alantang.lunchbuddy.FacebookFriend;
 
 import android.content.Intent;
 
 @SuppressWarnings("serial")
-public class FriendsActivity extends Activity implements LoaderManager.LoaderCallbacks<Void>, Serializable, FriendsNowListAdapter.customButtonListener {
+public class FriendsDisplayFragment extends Fragment implements LoaderManager.LoaderCallbacks<Void>, Serializable, FriendsNowListAdapter.customButtonListener {
 
     private static final String TAG = "log_message";
 
@@ -62,19 +58,20 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
 
     private static final int friendsLoader = 0;
 
+    private FragmentActivity faActivity;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        faActivity = (FragmentActivity) super.getActivity();
+        // Replace LinearLayout by the type of the root element of the layout you're trying to load
+        RelativeLayout llLayout = (RelativeLayout) inflater.inflate(R.layout.fragment_friends_display, container, false);
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_friends);
+        mListViewFacebookIds = (ListView) llLayout.findViewById(R.id.listview_friends);
+        mListViewFriendsAvailableNow = (ListView) llLayout.findViewById(R.id.listview_friends_now);
 
-
-        mListViewFacebookIds = (ListView)findViewById(R.id.listview_friends);
-        mListViewFriendsAvailableNow = (ListView) findViewById(R.id.listview_friends_now);
-
-        facebookAdapter = new FacebookListAdapter(FriendsActivity.this, R.layout.child_friendslistview, facebookIds);
-        friendsNowAdapter = new FriendsNowListAdapter(FriendsActivity.this, R.layout.child_friendsnowlistview, friendsNowArray);
-        friendsNowAdapter.setCustomButtonListner(FriendsActivity.this);
+        facebookAdapter = new FacebookListAdapter(getActivity(), R.layout.child_friendslistview, facebookIds);
+        friendsNowAdapter = new FriendsNowListAdapter(getActivity(), R.layout.child_friendsnowlistview, friendsNowArray);
+        friendsNowAdapter.setCustomButtonListner(FriendsDisplayFragment.this);
 
         mListViewFacebookIds.setAdapter(facebookAdapter);
         mListViewFriendsAvailableNow.setAdapter(friendsNowAdapter);
@@ -83,9 +80,8 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
         if (isNetworkConnected()) {
             getLoaderManager().initLoader(friendsLoader, null, this);
         } else {
-            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+            Toast.makeText(getActivity().getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
         }
-
 
         mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -93,40 +89,50 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
                 Object listItem = mListViewFacebookIds.getItemAtPosition(position);
                 Intent intent = new Intent(view.getContext(), FriendsDetailActivity.class);
                 intent.putExtra("datesDetail", (Serializable) listItem);
-                startActivity(intent);
+                getActivity().startActivity(intent);
             }
         });
+
+        return llLayout;
     }
 
-    @Override
-    public void onResume(){
-        super.onResume();
-        Log.d(TAG, "friends on resume");
-    }
 
-    @Override
-    public void onPause(){
-        super.onPause();
-        Log.d(TAG, "friends on pause");
-    }
 
-    @Override
-     public void onStop(){
-        super.onStop();
-        Log.d(TAG, "friends on stop");
-    }
+//    @Override
+//    protected void onCreate(Bundle savedInstanceState) {
+//
+//        super.onCreate(savedInstanceState);
+//        setContentView(R.layout.fragment_friends_display);
+//
+//
+//        mListViewFacebookIds = (ListView)findViewById(R.id.listview_friends);
+//        mListViewFriendsAvailableNow = (ListView) findViewById(R.id.listview_friends_now);
+//
+//        facebookAdapter = new FacebookListAdapter(FriendsDisplayFragment.this, R.layout.child_friendslistview, facebookIds);
+//        friendsNowAdapter = new FriendsNowListAdapter(FriendsDisplayFragment.this, R.layout.child_friendsnowlistview, friendsNowArray);
+//        friendsNowAdapter.setCustomButtonListner(FriendsDisplayFragment.this);
+//
+//        mListViewFacebookIds.setAdapter(facebookAdapter);
+//        mListViewFriendsAvailableNow.setAdapter(friendsNowAdapter);
+//
+//
+//        if (isNetworkConnected()) {
+//            getLoaderManager().initLoader(friendsLoader, null, this);
+//        } else {
+//            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
+//        }
+//
+//        mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Object listItem = mListViewFacebookIds.getItemAtPosition(position);
+//                Intent intent = new Intent(view.getContext(), FriendsDetailFragment.class);
+//                intent.putExtra("datesDetail", (Serializable) listItem);
+//                startActivity(intent);
+//            }
+//        });
+//    }
 
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        Log.d(TAG, "friends on destroy");
-    }
-
-    @Override
-    public void onRestart(){
-        super.onRestart();
-        Log.d(TAG, "friends on restart");
-    }
 
     @Override
     public void onRequestClickListener(int position, String value) {
@@ -136,7 +142,7 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
 
     private AlertDialog requestOption(int position) {
         final int finalPosition = position;
-        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(this)
+        AlertDialog myQuittingDialogBox = new AlertDialog.Builder(getActivity())
                 //set message, title, and icon
                 .setTitle("Request")
                 .setMessage("Would you like to send this request?")
@@ -156,10 +162,10 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
                         appointment.put("RequestorName", ParseUser.getCurrentUser().get("FacebookName"));
                         appointment.put("RequestorId", ParseUser.getCurrentUser().getUsername());
 
-                        Toast.makeText(getApplicationContext(), "Sending request, please wait...", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "Sending request, please wait...", Toast.LENGTH_LONG).show();
                         appointment.saveInBackground();
                         //todo: check if request actually sent
-                        Toast.makeText(getApplicationContext(), "Request sent!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getActivity().getApplicationContext(), "Request sent!", Toast.LENGTH_LONG).show();
                         dialog.dismiss();
                     }
                 })
@@ -174,10 +180,9 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_friends, menu);
-        return true;
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -327,7 +332,7 @@ public class FriendsActivity extends Activity implements LoaderManager.LoaderCal
     }
 
     public boolean isNetworkConnected() {
-        final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        final ConnectivityManager conMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo activeNetwork = conMgr.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.getState() == NetworkInfo.State.CONNECTED;
     }
