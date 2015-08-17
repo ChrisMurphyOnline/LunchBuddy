@@ -124,13 +124,15 @@ public class FriendsDetailFragment extends Fragment implements LoaderManager.Loa
 //                Intent intent = getActivity().getIntent();
 //                receivedFriend = (FacebookFriend) intent.getSerializableExtra("datesDetail");
 
-                Bundle arguments = getArguments();
+                Bundle arguments = this.getArguments();
                 if (arguments != null) {
+                    Log.d(TAG, "arguments not null!");
                     receivedFriend = (FacebookFriend) getArguments().getSerializable("datesDetail");
                     title.setText(receivedFriend.name + "'s Available Dates: ");
                     mListDates = receivedFriend.dates;
+                } else {
+                    Log.d(TAG, "arguments null :(");
                 }
-
 
                 mListDatesString.clear();
                 for (int i = 0; i < mListDates.size(); i++) {

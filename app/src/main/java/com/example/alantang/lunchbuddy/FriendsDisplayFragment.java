@@ -86,10 +86,29 @@ public class FriendsDisplayFragment extends Fragment implements LoaderManager.Lo
         mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object listItem = mListViewFacebookIds.getItemAtPosition(position);
-                Intent intent = new Intent(view.getContext(), FriendsDetailActivity.class);
-                intent.putExtra("datesDetail", (Serializable) listItem);
-                getActivity().startActivity(intent);
+
+                if ( ((FriendsDisplayActivity)getActivity()).getTwoPane()) {
+                    Log.d(TAG, "in display fragment; two pane");
+                    Object listItem = mListViewFacebookIds.getItemAtPosition(position);
+
+                    Bundle arguments = new Bundle();
+                    arguments.putSerializable("datesDetail", (Serializable) listItem);
+                    FriendsDetailFragment friendsDetailFragment = new FriendsDetailFragment();
+                    friendsDetailFragment.setArguments(arguments);
+
+
+                    getFragmentManager().beginTransaction()
+                            .replace(R.id.friends_detail_container, friendsDetailFragment).commit();
+
+
+                } else {
+                    Log.d(TAG, "in display fragment; one pane");
+                    Object listItem = mListViewFacebookIds.getItemAtPosition(position);
+                    Intent intent = new Intent(view.getContext(), FriendsDetailActivity.class);
+                    intent.putExtra("datesDetail", (Serializable) listItem);
+                    getActivity().startActivity(intent);
+                }
+
             }
         });
 

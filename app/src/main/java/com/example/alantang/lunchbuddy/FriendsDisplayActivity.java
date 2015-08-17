@@ -5,6 +5,7 @@ import android.app.FragmentTransaction;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 public class FriendsDisplayActivity extends FragmentActivity {
 
     private boolean mTwoPane;
+    private static final String TAG = "log_message";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,17 +22,22 @@ public class FriendsDisplayActivity extends FragmentActivity {
 
     if (findViewById(R.id.friends_detail_container) != null) {
         // The detail container view will be present only in the large-screen layouts
-        // (res/layout-sw600dp). If this view is present, then the activity should be
+        // (res/layout-large). If this view is present, then the activity should be
         // in two-pane mode.
+        Log.d(TAG, "in two pane");
+
         mTwoPane = true;
         // In two-pane mode, show the detail view in this activity by
         // adding or replacing the detail fragment using a
         // fragment transaction.
+
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.friends_detail_container, new FriendsDetailFragment())
                     .commit();
         }
+    } else {
+        Log.d(TAG, "in one pane");
     }
 
     getFragmentManager().findFragmentById(R.id.friendsDisplayFragment);
@@ -59,4 +66,9 @@ public class FriendsDisplayActivity extends FragmentActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public boolean getTwoPane() {
+        return mTwoPane;
+    }
+
 }

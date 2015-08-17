@@ -3,6 +3,7 @@ package com.example.alantang.lunchbuddy;
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -10,6 +11,8 @@ import java.io.Serializable;
 
 
 public class FriendsDetailActivity extends FragmentActivity {
+
+    private static final String TAG = "log_message";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +23,8 @@ public class FriendsDetailActivity extends FragmentActivity {
 //        FacebookFriend receivedFriend = (FacebookFriend) intent.getSerializableExtra("datesDetail");
 
         if (savedInstanceState == null) {
+            Log.d(TAG, "in friends detail activity");
+
             Bundle bundle = new Bundle();
             bundle.putSerializable("datesDetail", getIntent().getSerializableExtra("datesDetail"));
 

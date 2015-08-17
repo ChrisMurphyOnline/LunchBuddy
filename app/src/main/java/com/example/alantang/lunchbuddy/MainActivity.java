@@ -36,13 +36,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         // Enable Local Datastore.
-
-
-
-
         final List<String> permissions = Arrays.asList("public_profile", "email");
-
-
 //         get Development Key Hash
 //        try {
 //            PackageInfo info = getPackageManager().getPackageInfo("com.example.alantang.lunchbuddy",
