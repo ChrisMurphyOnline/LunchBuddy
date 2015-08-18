@@ -1,7 +1,12 @@
 package com.example.alantang.lunchbuddy;
 
+import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,12 +27,15 @@ import com.parse.ParseUser;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import android.content.pm.Signature;
 import java.util.Arrays;
 import java.util.List;
 import android.app.Activity;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
 
     private static final String TAG = "log_message";
 
@@ -35,9 +43,16 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Enable Local Datastore.
-        final List<String> permissions = Arrays.asList("public_profile", "email");
-//         get Development Key Hash
+        if (!isLoggedIn()) {
+            Log.d(TAG, "not logged in");
+            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(i);
+        }
+
+//        // Enable Local Datastore.
+//        final List<String> permissions = Arrays.asList("public_profile", "email");
+//
+////         get Development Key Hash
 //        try {
 //            PackageInfo info = getPackageManager().getPackageInfo("com.example.alantang.lunchbuddy",
 //                    PackageManager.GET_SIGNATURES);
@@ -51,21 +66,23 @@ public class MainActivity extends Activity {
 //        } catch (NoSuchAlgorithmException e) {
 //            Log.e("Test", e.getMessage());
 //        }
-
-        ParseUser.logOut();
-
-        ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions, new LogInCallback() {
-            @Override
-            public void done(ParseUser user, ParseException err) {
-                if (user == null) {
-                    Log.d(TAG, "Uh oh. The user cancelled the Facebook login.");
-                } else if (user.isNew()) {
-                    saveFacebookId();
-                } else {
-                    saveFacebookId();
-                }
-            }
-        });
+//
+//        ParseUser.logOut();
+//
+//        ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions, new LogInCallback() {
+//            @Override
+//            public void done(ParseUser user, ParseException err) {
+//                if (user == null) {
+//                    Log.d(TAG, "Uh oh. The user cancelled the Facebook login.");
+//                } else if (user.isNew()) {
+//                    facebookLoggedIn = true;
+//                    saveFacebookId();
+//                } else {
+//                    facebookLoggedIn = true;
+//                    saveFacebookId();
+//                }
+//            }
+//        });
 
 
 //        sets content to be activity_main.xml
@@ -80,46 +97,73 @@ public class MainActivity extends Activity {
         buttonProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
-                startActivity(i);
+                if (isLoggedIn()) {
+                    Intent i = new Intent(getApplicationContext(), ProfileActivity.class);
+                    startActivity(i);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Not logged into Facebook", Toast.LENGTH_LONG).show();
+                }
+
             }
         });
 
         buttonCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), CalendarActivity.class);
-                startActivity(i);
+                if (isLoggedIn()) {
+                    Intent i = new Intent(getApplicationContext(), CalendarActivity.class);
+                    startActivity(i);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Not logged into Facebook", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         buttonFriends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), FriendsDisplayActivity.class);
-                startActivity(i);
+                if (isLoggedIn()) {
+                    Intent i = new Intent(getApplicationContext(), FriendsDisplayActivity.class);
+                    startActivity(i);
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Not logged into Facebook", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         buttonPending.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), PendingActivity.class);
-                startActivity(i);
+                if (isLoggedIn()) {
+                    Intent i = new Intent(getApplicationContext(), PendingActivity.class);
+                    startActivity(i);
+                }
+
+                else {
+                    Toast.makeText(getApplicationContext(), "Not logged into Facebook", Toast.LENGTH_LONG).show();
+                }
             }
         });
 
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    ParseUser.getCurrentUser().put("Available", true);
-                    Toast.makeText(getApplicationContext(), "Status set to available!", Toast.LENGTH_LONG).show();
-                    ParseUser.getCurrentUser().saveInBackground();
+                if (isLoggedIn()) {
+                    if (isChecked) {
+                        ParseUser.getCurrentUser().put("Available", true);
+                        Toast.makeText(getApplicationContext(), "Status set to available!", Toast.LENGTH_LONG).show();
+                        ParseUser.getCurrentUser().saveInBackground();
 
-                } else {
-                    ParseUser.getCurrentUser().put("Available", false);
-                    Toast.makeText(getApplicationContext(), "Status set to unavailable.", Toast.LENGTH_LONG).show();
-                    ParseUser.getCurrentUser().saveInBackground();
+                    } else {
+                        ParseUser.getCurrentUser().put("Available", false);
+                        Toast.makeText(getApplicationContext(), "Status set to unavailable.", Toast.LENGTH_LONG).show();
+                        ParseUser.getCurrentUser().saveInBackground();
+                    }
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "Not logged into Facebook", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -127,12 +171,7 @@ public class MainActivity extends Activity {
     }
 
 
-    // Facebook calls this feature "Single sign-on" (SSO), and requires you to override onActivityResult() in your calling Activity
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        ParseFacebookUtils.onActivityResult(requestCode, resultCode, data);
-    }
+
 
     @Override
     protected void onStart() {
@@ -163,24 +202,29 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void saveFacebookId() {
-        GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-            @Override
-            public void onCompleted(JSONObject user, GraphResponse response) {
-                response.getError();
-                Log.e("JSON:", user.toString());
-                try {
-                    String userId = user.getString("id");
-                    String facebookName = user.getString("name");
-                    Log.d(TAG, userId);
-                    ParseUser.getCurrentUser().put("FacebookId", userId);
-                    ParseUser.getCurrentUser().put("FacebookName", facebookName);
-                    ParseUser.getCurrentUser().saveInBackground();
-                    Toast.makeText(getApplicationContext(), "Logged in as " + facebookName, Toast.LENGTH_LONG).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).executeAsync();
+//    private void saveFacebookId() {
+//        GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
+//            @Override
+//            public void onCompleted(JSONObject user, GraphResponse response) {
+//                response.getError();
+//                Log.e("JSON:", user.toString());
+//                try {
+//                    String userId = user.getString("id");
+//                    String facebookName = user.getString("name");
+//                    Log.d(TAG, userId);
+//                    ParseUser.getCurrentUser().put("FacebookId", userId);
+//                    ParseUser.getCurrentUser().put("FacebookName", facebookName);
+//                    ParseUser.getCurrentUser().saveInBackground();
+//                    Toast.makeText(getApplicationContext(), "Logged in as " + facebookName, Toast.LENGTH_LONG).show();
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).executeAsync();
+//    }
+
+    public boolean isLoggedIn() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        return accessToken != null;
     }
 }

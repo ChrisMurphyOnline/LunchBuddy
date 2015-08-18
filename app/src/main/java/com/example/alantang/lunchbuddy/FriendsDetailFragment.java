@@ -72,28 +72,6 @@ public class FriendsDetailFragment extends Fragment implements LoaderManager.Loa
 
     }
 
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.fragment_friends_detail);
-//
-//        mListViewDates = (ListView) findViewById(R.id.listview_friends_detail);
-//        mDatesAdaptor = new DetailListAdapter(FriendsDetailFragment.this, mListDatesString);
-//        mDatesAdaptor.setCustomButtonListner(FriendsDetailFragment.this);
-//        mListViewDates.setAdapter(mDatesAdaptor);
-//
-//        if (isNetworkConnected()) {
-//            getLoaderManager().initLoader(friendsDetailLoader, null, this);
-//        } else {
-//            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
-//        }
-//
-//
-//
-//    }
-
-
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         // Inflate the menu; this adds items to the action bar if it is present.

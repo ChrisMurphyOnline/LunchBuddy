@@ -33,11 +33,11 @@ public class Application extends android.app.Application {
         Parse.initialize(this, "cRs6iJZlt7MHBAqP8ch1SKLREZ6yADDtgl66Cf82", "NVjTb0Y3aMVWHrpEUCjxiIWQPEuj1aOIjBCmkD8Z");
         ParseFacebookUtils.initialize(this);
 
-
         // Initialize the SDK before executing any other operations,
         // especially, if you're using Facebook UI elements.
         FacebookSdk.sdkInitialize(getApplicationContext());
 
+        Log.d(TAG, "permissions initialized");
     }
 
 }
