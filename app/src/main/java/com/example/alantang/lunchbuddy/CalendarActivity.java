@@ -48,7 +48,6 @@ public class CalendarActivity extends Activity
     boolean fromProfile = false;
 
     // constructor
-
     public CalendarActivity()
     {
         // Assign current Date and Time Values to Variables
@@ -92,8 +91,6 @@ public class CalendarActivity extends Activity
             }
         });
 
-        //Todo: check for duplicates
-        //Todo: make sure select date and select time are clicked to avoid erros
         // Set ClickListener for submit button
         buttonSubmit.setOnClickListener(new View.OnClickListener() {
 
@@ -151,9 +148,10 @@ public class CalendarActivity extends Activity
 
 
         });
-        //test parse
+
     }
 
+    //checks whether Calendar was accessed from Profile or MainActivity
     private void receiveIntent() {
 
         Bundle extras = getIntent().getExtras();
@@ -221,8 +219,6 @@ public class CalendarActivity extends Activity
                     else {
                         Log.i(TAG, "Date not inputted ");
                     }
-                    // Set the Selected Date in Select date Button
-
                 }
             };
 
@@ -245,6 +241,8 @@ public class CalendarActivity extends Activity
         return null;
     }
 
+
+    // Checks whether network is connected
 
     public boolean isNetworkConnected() {
         final ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);

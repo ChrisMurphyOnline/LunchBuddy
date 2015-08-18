@@ -115,44 +115,6 @@ public class FriendsDisplayFragment extends Fragment implements LoaderManager.Lo
         return llLayout;
     }
 
-
-
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.fragment_friends_display);
-//
-//
-//        mListViewFacebookIds = (ListView)findViewById(R.id.listview_friends);
-//        mListViewFriendsAvailableNow = (ListView) findViewById(R.id.listview_friends_now);
-//
-//        facebookAdapter = new FacebookListAdapter(FriendsDisplayFragment.this, R.layout.child_friendslistview, facebookIds);
-//        friendsNowAdapter = new FriendsNowListAdapter(FriendsDisplayFragment.this, R.layout.child_friendsnowlistview, friendsNowArray);
-//        friendsNowAdapter.setCustomButtonListner(FriendsDisplayFragment.this);
-//
-//        mListViewFacebookIds.setAdapter(facebookAdapter);
-//        mListViewFriendsAvailableNow.setAdapter(friendsNowAdapter);
-//
-//
-//        if (isNetworkConnected()) {
-//            getLoaderManager().initLoader(friendsLoader, null, this);
-//        } else {
-//            Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
-//        }
-//
-//        mListViewFacebookIds.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Object listItem = mListViewFacebookIds.getItemAtPosition(position);
-//                Intent intent = new Intent(view.getContext(), FriendsDetailFragment.class);
-//                intent.putExtra("datesDetail", (Serializable) listItem);
-//                startActivity(intent);
-//            }
-//        });
-//    }
-
-
     @Override
     public void onRequestClickListener(int position, String value) {
         AlertDialog requestBox = requestOption(position);
@@ -221,7 +183,6 @@ public class FriendsDisplayFragment extends Fragment implements LoaderManager.Lo
 
     @Override
     public Loader<Void> onCreateLoader(int id, Bundle args) {
-
         switch (id) {
             case friendsLoader:
                 new DownloadFriendsList().execute();

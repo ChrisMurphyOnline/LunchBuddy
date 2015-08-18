@@ -123,18 +123,8 @@ public class MainActivity extends Activity {
                 }
             }
         });
-
-        // Intent for User to be accessible from other activities
-//        Intent i = new Intent(getApplicationContext(), MainActivity.class);
-//        i.putExtra("new_variable_name","value");
-//        startActivity(i);
-
-
         Log.i(TAG, "onCreate");
     }
-
-
-
 
 
     // Facebook calls this feature "Single sign-on" (SSO), and requires you to override onActivityResult() in your calling Activity

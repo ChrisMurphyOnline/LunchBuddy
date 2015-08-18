@@ -114,7 +114,6 @@ public class PendingActivity extends Activity implements LoaderManager.LoaderCal
 
     @Override
     public Loader<Void> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG, "in create loader");
         switch (id) {
             case requestsLoader:
                 parseQueries.retrievePendingRequests();

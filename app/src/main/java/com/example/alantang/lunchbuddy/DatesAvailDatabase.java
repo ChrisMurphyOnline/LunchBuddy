@@ -50,23 +50,5 @@ public class DatesAvailDatabase extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    /**
-     * Create sample data to use
-     *
-     * @param db
-     *            The open database
-     */
-//    private void seedData(SQLiteDatabase db) {
-//        ContentValues testValues = new ContentValues();
-//        testValues.put(COL_USER, "test user 1");
-//        testValues.put(COL_DATE, "test date 1");
-//        testValues.put(COL_UPDATED, "test updated 1");
-//
-//        db.insert(TABLE_DATES_AVAIL, null, testValues);
-////        db.execSQL("insert into tutorials (user, date, updated) values ('Hello', 'Test1', 'End of Test');");
-////        db.execSQL("insert into tutorials (user, date, updated) values ('Hello', 'Test2', 'End of Test');");
-//    }
-
-
 
 }

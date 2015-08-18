@@ -19,8 +19,6 @@ public class FriendsDetailActivity extends FragmentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends_detail);
 
-//        Intent intent = getIntent();
-//        FacebookFriend receivedFriend = (FacebookFriend) intent.getSerializableExtra("datesDetail");
 
         if (savedInstanceState == null) {
             Log.d(TAG, "in friends detail activity");
@@ -36,10 +34,6 @@ public class FriendsDetailActivity extends FragmentActivity {
                     .commit();
 
         }
-
-
-        //set Fragmentclass Arguments
-
 
     }
 

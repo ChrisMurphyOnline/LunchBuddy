@@ -14,18 +14,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CursorAdapter;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.parse.FindCallback;
@@ -39,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.AsyncTaskLoader;
 import android.content.Loader;
 import android.content.Context;
 
@@ -54,11 +47,8 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
 
     ListView mListViewAppointments, mListViewAvailable;
     ArrayList mListAppointments = new ArrayList<String>();
-    ArrayList mListDatesAvailable = new ArrayList<String>();
     ConfirmedListAdapter mAppointmentsAdapter;
-    ListAdapter mAvailableAdapter;
     DatesAvailCursorAdapter datesAvailAdapter;
-//    DatesAvailCursorAdapter datesAvailSimpleCursorAdapter;
     Cursor datesAvailCursor;
 
     String displayDate;
@@ -72,8 +62,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
     Date date;
 
     private static final int availableLoader = 0;
-    private static final int appointmentLoader = 1;
-
     SQLiteDatabase datesAvailDb;
 
     @Override
@@ -83,7 +71,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
 
         DatesAvailDatabase handler = new DatesAvailDatabase(this);
         datesAvailDb = handler.getWritableDatabase();
-
 
         // download list of appointments
 
@@ -112,7 +99,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
         } else {
             Toast.makeText(getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
         }
-
     }
 
 
@@ -138,8 +124,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
         return super.onOptionsItemSelected(item);
     }
 
-
-
     @Override
     public void onClearClickListener(int position, String value) {
         AlertDialog clearBox = clearOption(position);
@@ -148,7 +132,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG, "in create loader");
         String[] projection = {
                 DatesAvailDatabase.ID, DatesAvailDatabase.COL_DATE };
         CursorLoader cursorLoader = new CursorLoader(this,
@@ -159,9 +142,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG, "On Load Finished Rows: " + String.valueOf(data.getCount()));
-        Log.d(TAG, "On Load Finished Contents: " + DatabaseUtils.dumpCursorToString(data));
-
         datesAvailAdapter.swapCursor(data);
         datesAvailAdapter.notifyDataSetChanged();
     }
@@ -193,12 +173,9 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
         query.findInBackground(new FindCallback<ParseObject>() {
             public void done(List<ParseObject> objects, ParseException e) {
                 if (e == null) {
-                    Log.d(TAG, "Retrieved " + objects.size() + " objects");
                     if (objects.size() > 0) {
                         String objectId = objects.get(0).getObjectId();
                         String date = objects.get(0).getDate("Date").toString();
-                        Log.d(TAG, "Date: " + objectId);
-                        Log.d(TAG, "Object ID: " + objectId);
                         Intent intent = new Intent(getApplicationContext(), CalendarActivity.class);
                         Bundle extras = new Bundle();
                         extras.putString("DATE_FROM_PROFILE", date);
@@ -268,16 +245,9 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
                                  values.put(DatesAvailDatabase.COL_DATE, formattedDate);
                                  values.put(DatesAvailDatabase.COL_UPDATED, dateFormat.format(object.getUpdatedAt()));
                                  datesAvailDb.insert(DatesAvailDatabase.TABLE_DATES_AVAIL, null, values);
-
-//                                 mListDatesAvailable.add(formattedDate);
-//                                 Log.d(TAG, "Reconverted day: " + convertStringToDate(formattedDate));
                              }
                         }
                         datesAvailCursor = datesAvailDb.rawQuery("SELECT * FROM dates", null);
-
-                        Log.d(TAG, "Rows: " + String.valueOf(datesAvailCursor.getCount()));
-                        Log.d(TAG, "Contents: " + DatabaseUtils.dumpCursorToString(datesAvailCursor));
-//
 
                         displayListView();
 
@@ -332,35 +302,6 @@ public class ProfileActivity extends Activity implements LoaderCallbacks<Cursor>
                 }
             });
         }
-
-
-//        public void deleteObject (Date date) {
-//            Log.d(TAG, "in deleteObject");
-//            Log.d(TAG, date.toString());
-//            ParseQuery<ParseObject> query = ParseQuery.getQuery("DatesAvailable");
-//            query.whereEqualTo("Date", date);
-//            query.findInBackground(new FindCallback<ParseObject>() {
-//                public void done(List<ParseObject> objects, ParseException e) {
-//                    if (e == null) {
-//                        Log.d(TAG, "Retrieved " + objects.size() + " objects");
-//                        if (objects.size() > 0) {
-//                            objects.get(0).deleteInBackground();
-//                            Toast.makeText(ProfileActivity.this, "Item deleted!", Toast.LENGTH_SHORT).show();
-//                            mListDatesAvailable.clear();
-//                            mAvailableAdapter.clear();
-//                            parseQueries.retrieveDatesAvailable();
-//                        } else {
-//                            Log.d(TAG, "No object found!");
-//                        }
-//
-//
-//                    } else {
-//                        Toast.makeText(ProfileActivity.this, "Oops! Item does not exist. Please refresh the page.", Toast.LENGTH_SHORT).show();
-//                        Log.d(TAG, "Error: " + e.getMessage());
-//                    }
-//                }
-//            });
-//        }
     }
 
     public boolean isNetworkConnected() {
