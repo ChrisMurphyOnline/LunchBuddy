@@ -1,0 +1,37 @@
+Rick TestUser
+rick_yoxzaac_testuser@tfbnw.net
+Facebook ID: 138106373193085
+Parse username: GKP99DKEFuNqREm0oalHF0Pb8
+Dates Avail: Aug 1, 2 
+
+Richard Testuser 
+richard_bigavvh_testuser@tfbnw.net 
+Facebook ID: 141892162812210
+Parse username: H5YovkZKGWNF7SVKaVwFsum73
+Dates Avail: Sept 1, Sept 2, Sept 3 
+
+Helen Testuser 
+helen_dbffvlw_testuser@tfbnw.net 
+Facebook ID: 101284546890624
+Parse Username: gb1citwMWPhWB9fiZgn0H8Ehy
+Dates Avail: Oct 1 2 3 4 
+
+
+Test sequence: 
+Rick requests appointments with: 
+Richard (Sept 1, 2) 
+Helen (Oct 1, 2) 
+should see in pending appts. 
+
+Richard logs in. 
+See 2 requests from Rick. 
+Accepts Sept 1 -> create 2 parse objects 
+Rejects Sept 2 -> 
+should see nothing in pending 
+Confirmed appt: Sept 1 -> clear; delte 1 object. 1 copy left. 
+
+ 
+
+Rick should see: 
+Confirmed appts: Sept 1 -> clear; delete  object. 0 left. 
+Rejected appts: Sept 2  -> clear; delete 1 object 
