@@ -49,42 +49,6 @@ public class MainActivity extends FragmentActivity {
             startActivity(i);
         }
 
-//        // Enable Local Datastore.
-//        final List<String> permissions = Arrays.asList("public_profile", "email");
-//
-////         get Development Key Hash
-//        try {
-//            PackageInfo info = getPackageManager().getPackageInfo("com.example.alantang.lunchbuddy",
-//                    PackageManager.GET_SIGNATURES);
-//            for (Signature signature : info.signatures) {
-//                MessageDigest md = MessageDigest.getInstance("SHA");
-//                md.update(signature.toByteArray());
-//                Log.i("KeyHash: ", Base64.encodeToString(md.digest(), 0));
-//            }
-//        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
-//            Log.e("Test", e.getMessage());
-//        } catch (NoSuchAlgorithmException e) {
-//            Log.e("Test", e.getMessage());
-//        }
-//
-//        ParseUser.logOut();
-//
-//        ParseFacebookUtils.logInWithReadPermissionsInBackground(this, permissions, new LogInCallback() {
-//            @Override
-//            public void done(ParseUser user, ParseException err) {
-//                if (user == null) {
-//                    Log.d(TAG, "Uh oh. The user cancelled the Facebook login.");
-//                } else if (user.isNew()) {
-//                    facebookLoggedIn = true;
-//                    saveFacebookId();
-//                } else {
-//                    facebookLoggedIn = true;
-//                    saveFacebookId();
-//                }
-//            }
-//        });
-
-
 //        sets content to be activity_main.xml
         setContentView(R.layout.activity_main);
 
